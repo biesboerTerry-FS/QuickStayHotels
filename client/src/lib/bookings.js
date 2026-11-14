@@ -37,6 +37,12 @@ export const bookingStatus = (booking) => {
 export const canCancel = (booking) =>
 	booking.status !== "cancelled" && toDay(booking.checkInDate) > todayIso();
 
+export const applyOffer = (total, offer) => {
+	if (!offer || !offer.priceOff) return { discount: 0, total };
+	const discount = Math.round((total * offer.priceOff) / 100);
+	return { discount, total: total - discount };
+};
+
 export const createBooking = ({
 	room,
 	checkIn,
@@ -44,20 +50,28 @@ export const createBooking = ({
 	guests,
 	paymentMethod,
 	user,
-}) => ({
-	_id: makeId(),
-	roomId: room._id,
-	userId: user.id,
-	userName: user.fullName || user.username || "Guest",
-	checkInDate: toDay(checkIn),
-	checkOutDate: toDay(checkOut),
-	guests: Number(guests),
-	totalPrice: nightsBetween(checkIn, checkOut) * room.pricePerNight,
-	paymentMethod,
-	isPaid: false,
-	status: "pending",
-	createdAt: new Date().toISOString(),
-});
+	offer = null,
+}) => {
+	const baseTotal = nightsBetween(checkIn, checkOut) * room.pricePerNight;
+	const { discount, total } = applyOffer(baseTotal, offer);
+	return {
+		_id: makeId(),
+		roomId: room._id,
+		userId: user.id,
+		userName: user.fullName || user.username || "Guest",
+		checkInDate: toDay(checkIn),
+		checkOutDate: toDay(checkOut),
+		guests: Number(guests),
+		basePrice: baseTotal,
+		discount,
+		offerId: offer?._id || null,
+		totalPrice: total,
+		paymentMethod,
+		isPaid: false,
+		status: "pending",
+		createdAt: new Date().toISOString(),
+	};
+};
 
 const escapeIcs = (value) =>
 	String(value).replace(/[\\;,]/g, (char) => `\\${char}`).replace(/\n/g, "\\n");

@@ -1,9 +1,13 @@
 import express, { request, response } from "express";
 import "dotenv/config";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import connectDB from "./config/db.js";
 import { clerkMiddleware } from "@clerk/express";
 import clerkWebhooks from "./controllers/clerkWebhooks.js";
+import roomRoutes from "./routes/roomRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 const app = express();
 
@@ -21,8 +25,20 @@ app.use(
 app.use(express.json());
 app.use(clerkMiddleware());
 
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 100,
+	message: { success: false, message: "Too many requests, please try again later." },
+});
+app.use(limiter);
+
 //^ api to listen for clerk webhooks
 app.post("/api/clerk", clerkWebhooks);
+
+//^ resource routes
+app.use("/api/rooms", roomRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.get("/", (request, response) => response.send("API is working, yo"));
 app.get("/health", (request, response) =>

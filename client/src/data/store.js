@@ -6,6 +6,7 @@ import {
 	hotelProfileDefaults,
 	seedReviewsFor,
 } from "./catalog";
+import { offers as seedOffers } from "./offers";
 import { toDay } from "../lib/format";
 
 // Browser-side store. Only plain data is persisted (no image URLs or nested
@@ -38,6 +39,7 @@ const defaults = {
 	searches: [],
 	newsletter: [],
 	profile: hotelProfileDefaults,
+	offers: seedOffers,
 };
 
 const cache = {};
@@ -118,6 +120,8 @@ export const useRooms = () => {
 		[overrides, added, profile]
 	);
 };
+
+export const useOffers = () => useStore("offers");
 
 const fallbackRoom = (booking) => ({
 	_id: booking.roomId,

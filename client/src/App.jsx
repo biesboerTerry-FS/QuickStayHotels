@@ -17,8 +17,11 @@ import AddRoom from "./pages/hotelOwner/AddRoom";
 import ListRooms from "./pages/hotelOwner/ListRooms";
 import Bookings from "./pages/hotelOwner/Bookings";
 import HotelProfile from "./pages/hotelOwner/HotelProfile";
+import OwnerOffers from "./pages/hotelOwner/Offers";
 import InfoPage from "./pages/InfoPage";
 import NotFound from "./pages/NotFound";
+import Offers from "./pages/Offers";
+import OfferDetails from "./pages/OfferDetails";
 import RequireOwner from "./components/RequireOwner";
 import CookieBanner from "./components/CookieBanner";
 import { infoPages } from "./data/infoPages";
@@ -60,6 +63,8 @@ const App = () => {
 					<Route path="/pay/:bookingId" element={<PaymentPage />} />
 					<Route path="/my-bookings" element={<MyBookings />} />
 					<Route path="/saved" element={<SavedRooms />} />
+					<Route path="/offers" element={<Offers />} />
+					<Route path="/offers/:slug" element={<OfferDetails />} />
 					{Object.keys(infoPages).map((slug) => (
 						<Route
 							key={slug}
@@ -79,6 +84,7 @@ const App = () => {
 						<Route path="add-room" element={<AddRoom />} />
 						<Route path="list-rooms" element={<ListRooms />} />
 						<Route path="bookings" element={<Bookings />} />
+						<Route path="offers" element={<OwnerOffers />} />
 						<Route path="profile" element={<HotelProfile />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />

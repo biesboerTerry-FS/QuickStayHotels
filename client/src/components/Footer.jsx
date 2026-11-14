@@ -27,11 +27,11 @@ const legalLinks = [
 	{ name: "Sitemap", path: "/sitemap" },
 ];
 
-const socialIcons = [
-	{ src: assets.instagramIcon, alt: "instagram-icon" },
-	{ src: assets.facebookIcon, alt: "facebook-icon" },
-	{ src: assets.twitterIcon, alt: "twitter-icon" },
-	{ src: assets.linkendinIcon, alt: "linkedin-icon" },
+const socialLinks = [
+	{ src: assets.instagramIcon, label: "Instagram", href: "#" },
+	{ src: assets.facebookIcon, label: "Facebook", href: "#" },
+	{ src: assets.twitterIcon, label: "X (Twitter)", href: "#" },
+	{ src: assets.linkendinIcon, label: "LinkedIn", href: "#" },
 ];
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -56,48 +56,40 @@ const Footer = () => {
 	return (
 		<footer className="bg-[#f6f9fc] text-gray-600 pt-6 px-4 md:px-10 lg:px-16 xl:px-20">
 			<div className="flex flex-wrap justify-between gap-8 md:gap-4">
-				<div className="max-w-80 xl:max-w-64">
+				<div className="w-full md:max-w-sm lg:max-w-64">
 					<img
 						src={assets.logo}
 						alt="logo"
-						className="invert opacity-80 mb-4 h-8 md:h-9"
+						className="invert opacity-80 h-8 md:h-9"
 					/>
-					<p className="text-sm">
+					<p className="text-sm mt-4">
 						Discover the world's most extraordinary places to stay,
 						from boutique hotels to luxury villas and private
 						islands.
 					</p>
-					<div className="flex items-center gap-3 mt-4">
-						{socialIcons.map((icon) => (
-							<img
-								key={icon.alt}
-								src={icon.src}
-								alt={icon.alt}
-								className="w-6"
-							/>
-						))}
-					</div>
 				</div>
 
-				{Object.entries(footerLinks).map(([heading, links]) => (
-					<div key={heading}>
-						<p className="font-playfair text-lg text-gray-800 uppercase">
-							{heading}
-						</p>
-						<ul className="mt-3 flex flex-col gap-2 text-sm">
-							{links.map((link) => (
-								<li key={link.path}>
-									<Link
-										to={link.path}
-										className="hover:text-gray-900 transition-colors"
-									>
-										{link.name}
-									</Link>
-								</li>
-							))}
-						</ul>
-					</div>
-				))}
+				<div className="grid grid-cols-2 gap-8 w-full sm:w-auto">
+					{Object.entries(footerLinks).map(([heading, links]) => (
+						<div key={heading}>
+							<p className="font-playfair text-lg text-gray-800 uppercase">
+								{heading}
+							</p>
+							<ul className="mt-3 flex flex-col gap-2 text-sm">
+								{links.map((link) => (
+									<li key={link.path}>
+										<Link
+											to={link.path}
+											className="hover:text-gray-900 transition-colors"
+										>
+											{link.name}
+										</Link>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</div>
 
 				<div className="w-full xl:w-1/4 flex flex-col gap-3">
 					<div>
@@ -130,6 +122,22 @@ const Footer = () => {
 							/>
 						</button>
 					</form>
+					<div className="flex items-center justify-between mt-1">
+						{socialLinks.map((icon) => (
+							<a
+								key={icon.label}
+								href={icon.href}
+								aria-label={icon.label}
+								onClick={(event) => {
+									event.preventDefault();
+									toast.show(`Follow us on ${icon.label} (link coming soon)`);
+								}}
+								className="hover:opacity-75 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+							>
+								<img src={icon.src} alt="" className="w-6" />
+							</a>
+						))}
+					</div>
 				</div>
 			</div>
 			<hr className="border-gray-300 mt-6" />

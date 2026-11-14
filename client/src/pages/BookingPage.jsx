@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { assets } from "../assets/assets";
+import { offers } from "../data/offers";
 import { setState, useRooms, useStore } from "../data/store";
 import {
+	applyOffer,
 	createBooking,
 	isRoomFree,
 	isValidRange,
@@ -48,6 +50,8 @@ const BookingPage = () => {
 	const checkIn = searchParams.get("checkIn") || "";
 	const checkOut = searchParams.get("checkOut") || "";
 	const guests = Number(searchParams.get("guests")) || 1;
+	const offerCode = searchParams.get("offer") || "";
+	const offer = offers.find((item) => item.slug === offerCode || item._id === offerCode);
 
 	if (!room) {
 		return (
@@ -98,7 +102,8 @@ const BookingPage = () => {
 	}
 
 	const nights = nightsBetween(checkIn, checkOut);
-	const total = nights * room.pricePerNight;
+	const baseTotal = nights * room.pricePerNight;
+	const { discount, total } = applyOffer(baseTotal, offer);
 	const email = user.primaryEmailAddress?.emailAddress;
 
 	const confirm = () => {
@@ -113,6 +118,7 @@ const BookingPage = () => {
 			guests,
 			paymentMethod: payment,
 			user,
+			offer,
 		});
 		setState("bookings", (list) => [booking, ...list]);
 		navigate(
@@ -194,6 +200,15 @@ const BookingPage = () => {
 						<span>{room.hotel.address}</span>
 					</div>
 
+					{offer && (
+						<div className="flex items-center gap-2 text-sm bg-green-50 text-green-700 rounded-lg px-3 py-2 mt-4">
+							<span>🎉</span>
+							<span>
+								{offer.title} applied ({offer.priceOff}% off)
+							</span>
+						</div>
+					)}
+
 					<dl className="grid grid-cols-2 gap-y-3 text-sm mt-6 border-t border-gray-200 pt-5">
 						<dt className="text-gray-500">Check-in</dt>
 						<dd className="text-right text-gray-800">{formatDay(checkIn)}</dd>
@@ -205,7 +220,13 @@ const BookingPage = () => {
 							{formatCurrency(room.pricePerNight)} × {nights} night
 							{nights === 1 ? "" : "s"}
 						</dt>
-						<dd className="text-right text-gray-800">{formatCurrency(total)}</dd>
+						<dd className="text-right text-gray-800">{formatCurrency(baseTotal)}</dd>
+						{discount > 0 && (
+							<>
+								<dt className="text-gray-500">Discount</dt>
+								<dd className="text-right text-green-600">-{formatCurrency(discount)}</dd>
+							</>
+						)}
 					</dl>
 					<div className="flex justify-between border-t border-gray-200 mt-4 pt-4 font-medium text-gray-800">
 						<span>Total</span>

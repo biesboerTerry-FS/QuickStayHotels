@@ -25,6 +25,11 @@ const Sidebar = () => {
 			icon: assets.calenderIcon,
 		},
 		{
+			name: "Offers",
+			path: "/owner/offers",
+			icon: assets.badgeIcon,
+		},
+		{
 			name: "Hotel Profile",
 			path: "/owner/profile",
 			icon: assets.homeIcon,

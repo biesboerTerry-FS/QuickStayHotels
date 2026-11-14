@@ -115,6 +115,10 @@
 	color: #64748b;
 }
 
+.dark .hover\:text-gray-900:hover {
+	color: #f1f5f9;
+}
+
 .dark .text-green-500,
 .dark .text-green-600,
 .dark .text-green-700 {

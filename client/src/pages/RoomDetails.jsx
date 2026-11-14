@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { assets, facilityIcons, roomCommonData } from "../assets/assets";
 import StarRating from "../components/StarRating";
@@ -14,6 +14,7 @@ import {
 import { useToast } from "../context/ToastContext";
 import { isRoomFree, isValidRange, nightsBetween } from "../lib/bookings";
 import { formatCurrency, formatDay, todayIso } from "../lib/format";
+import { getOfferBySlug } from "../data/offers";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 
 const inputClass =
@@ -31,6 +32,9 @@ const RoomDetails = () => {
 	const toast = useToast();
 
 	const room = rooms.find((item) => item._id === id);
+	const [searchParams] = useSearchParams();
+	const offerCode = searchParams.get("offer") || "";
+	const activeOffer = getOfferBySlug(offerCode);
 
 	const [mainImage, setMainImage] = useState(null);
 	const [stay, setStay] = useState({ checkIn: "", checkOut: "", guests: "1" });
@@ -85,6 +89,7 @@ const RoomDetails = () => {
 			checkOut: stay.checkOut,
 			guests: stay.guests,
 		});
+		if (offerCode) params.set("offer", offerCode);
 		navigate(`/book/${room._id}?${params.toString()}`);
 	};
 
@@ -109,17 +114,38 @@ const RoomDetails = () => {
 		toast.show("Thanks! Your review has been posted.");
 	};
 
+	const structuredData = {
+		"@context": "https://schema.org",
+		"@type": "LodgingReservation",
+		reservationFor: {
+			"@type": "LodgingBusiness",
+			name: room.hotel.name,
+			address: {
+				"@type": "PostalAddress",
+				streetAddress: room.hotel.address,
+				addressLocality: room.hotel.city,
+			},
+		},
+		price: room.pricePerNight,
+		priceCurrency: "USD",
+	};
+
 	return (
 		<div className="py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
+			<script type="application/ld+json">
+				{JSON.stringify(structuredData)}
+			</script>
 			{/* Room Details */}
 			<div className="flex flex-col md:flex-row items-start md:items-center gap-2">
 				<h1 className="text-3xl md:text-4xl font-playfair">
 					{room.hotel.name}
 					<span className="text-sm font-sans ml-2">({room.roomType})</span>
 				</h1>
-				<p className="text-xs py-1.5 px-3 text-white bg-orange-700 rounded-full">
-					20% Off
-				</p>
+				{activeOffer ? (
+					<p className="text-xs py-1.5 px-3 text-white bg-orange-700 rounded-full">
+						{activeOffer.priceOff}% Off
+					</p>
+				) : null}
 			</div>
 
 			{/* Room Rating */}

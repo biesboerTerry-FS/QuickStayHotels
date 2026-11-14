@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
 
 const Message = ({ title, text, children }) => (
@@ -21,6 +21,15 @@ const Message = ({ title, text, children }) => (
 const RequireOwner = ({ children }) => {
 	const { user, isLoaded } = useUser();
 	const { openSignIn, signOut } = useClerk();
+	const location = useLocation();
+
+	// Dev-only bypass: set VITE_DEV_OWNER_BYPASS=true in .env.local to skip auth
+	const devBypass =
+		import.meta.env.DEV && import.meta.env.VITE_DEV_OWNER_BYPASS === "true";
+
+	if (devBypass) {
+		return children;
+	}
 
 	if (!isLoaded) {
 		return (
@@ -37,7 +46,12 @@ const RequireOwner = ({ children }) => {
 				text="The hotel dashboard is for registered hotel owners. Sign in with your account to manage listings and bookings."
 			>
 				<button
-					onClick={() => openSignIn()}
+					onClick={() =>
+						openSignIn({
+							forceRedirectUrl: location.pathname + location.search,
+							fallbackRedirectUrl: "/owner",
+						})
+					}
 					className="px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull transition-all cursor-pointer"
 				>
 					Login

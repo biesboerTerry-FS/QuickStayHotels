@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import Title from "../components/Title";
+import EmptyState from "../components/EmptyState";
 import { assets } from "../assets/assets";
 import { setState, useBookings } from "../data/store";
 import { useToast } from "../context/ToastContext";
@@ -61,18 +62,27 @@ const MyBookings = () => {
 			/>
 
 			{isLoaded && bookings.length === 0 && (
-				<div className="mt-10 max-w-xl rounded-2xl border border-dashed border-gray-300 p-8 text-center">
-					<p className="text-lg font-medium text-gray-800">No bookings yet</p>
-					<p className="text-sm text-gray-500 mt-2">
-						When you book a stay it will appear here.
-					</p>
-					<Link
-						to="/rooms"
-						className="inline-block mt-5 px-5 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull"
-					>
-						Browse hotels
-					</Link>
-				</div>
+				<EmptyState
+					title="No bookings yet"
+					description="When you book a stay it will appear here. Start by browsing our hotels."
+					actionLabel="Browse hotels"
+					actionTo="/rooms"
+					icon={
+						<svg
+							className="w-12 h-12 text-gray-300"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={1.5}
+								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+							/>
+						</svg>
+					}
+				/>
 			)}
 
 			<div className="max-w-6xl mt-8 w-full text-gray-800">

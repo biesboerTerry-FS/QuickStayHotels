@@ -43,6 +43,7 @@ const HeartIcon = () => (
 const navLinks = [
 	{ name: "Home", path: "/" },
 	{ name: "Hotels", path: "/rooms" },
+	{ name: "Offers", path: "/offers" },
 	{ name: "Experience", path: "/experience" },
 	{ name: "About", path: "/about" },
 ];

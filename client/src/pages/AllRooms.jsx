@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { assets, facilityIcons } from "../assets/assets";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import SaveButton from "../components/SaveButton";
 import {
@@ -57,7 +57,6 @@ const RoomRating = ({ roomId }) => {
 
 const AllRooms = () => {
 	useDocumentTitle("Hotels");
-	const navigate = useNavigate();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [openFilters, setOpenFilters] = useState(false);
 	const rooms = useRooms();
@@ -112,11 +111,6 @@ const AllRooms = () => {
 		});
 
 	const clearSearch = () => setSearchParams({});
-
-	const openRoom = (id) => {
-		navigate(`/rooms/${id}`);
-		window.scrollTo(0, 0);
-	};
 
 	const nights = dates ? nightsBetween(dates.checkIn, dates.checkOut) : 0;
 
