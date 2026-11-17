@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
+import { useDemoUser } from "../context/DemoAuthContext";
 import { assets } from "../assets/assets";
 import { offers } from "../data/offers";
 import { setState, useRooms, useStore } from "../data/store";
@@ -43,6 +44,8 @@ const BookingPage = () => {
 	const rawBookings = useStore("bookings");
 	const { user, isLoaded } = useUser();
 	const { openSignIn } = useClerk();
+	const { isDemoUser, demoUser, startDemo, endDemo } = useDemoUser();
+	const activeUser = user || (isDemoUser ? demoUser : null);
 	const [payment, setPayment] = useState("Pay At Hotel");
 	const [error, setError] = useState("");
 
@@ -83,20 +86,38 @@ const BookingPage = () => {
 		);
 	}
 
-	if (!isLoaded) {
+	if (!isLoaded && !isDemoUser) {
 		return <Notice title="Loading…" />;
 	}
 
-	if (!user) {
+	if (!activeUser) {
 		return (
 			<Notice title="Sign in to book">
 				<p>We'll keep your selected dates while you sign in.</p>
-				<button
-					onClick={() => openSignIn()}
-					className="mt-6 px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull cursor-pointer"
-				>
-					Login
-				</button>
+				<div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+					<button
+						onClick={() => openSignIn()}
+						className="px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull cursor-pointer"
+					>
+						Login
+					</button>
+					{isDemoUser && (
+						<button
+							onClick={endDemo}
+							className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+						>
+							Exit demo
+						</button>
+					)}
+					{!isDemoUser && (
+						<button
+							onClick={() => startDemo("guest")}
+							className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+						>
+							Try demo
+						</button>
+					)}
+				</div>
 			</Notice>
 		);
 	}
@@ -104,7 +125,7 @@ const BookingPage = () => {
 	const nights = nightsBetween(checkIn, checkOut);
 	const baseTotal = nights * room.pricePerNight;
 	const { discount, total } = applyOffer(baseTotal, offer);
-	const email = user.primaryEmailAddress?.emailAddress;
+	const email = activeUser.primaryEmailAddress?.emailAddress;
 
 	const confirm = () => {
 		if (!isRoomFree(room._id, checkIn, checkOut, rawBookings)) {
@@ -117,7 +138,7 @@ const BookingPage = () => {
 			checkOut,
 			guests,
 			paymentMethod: payment,
-			user,
+			user: activeUser,
 			offer,
 		});
 		setState("bookings", (list) => [booking, ...list]);
@@ -140,8 +161,13 @@ const BookingPage = () => {
 					<section className="bg-white border border-gray-200 rounded-2xl p-6">
 						<h2 className="font-medium text-gray-800">Guest</h2>
 						<p className="mt-2 text-sm text-gray-600">
-							{user.fullName || user.username}
+							{activeUser.fullName || activeUser.username}
 							{email && ` · ${email}`}
+							{isDemoUser && (
+								<span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary/10 text-primary">
+									demo
+								</span>
+							)}
 						</p>
 					</section>
 

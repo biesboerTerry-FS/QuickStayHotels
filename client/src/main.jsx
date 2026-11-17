@@ -7,6 +7,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { ToastProvider } from "./context/ToastContext.jsx";
+import { DemoAuthProvider } from "./context/DemoAuthContext.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -32,15 +33,17 @@ createRoot(document.getElementById("root")).render(
 			signInFallbackRedirectUrl="/"
 			signInForceRedirectUrl={undefined}
 		>
-			<ThemeProvider>
-				<ToastProvider>
-					<BrowserRouter>
-						<ErrorBoundary>
-							<App />
-						</ErrorBoundary>
-					</BrowserRouter>
-				</ToastProvider>
-			</ThemeProvider>
+			<DemoAuthProvider>
+				<ThemeProvider>
+					<ToastProvider>
+						<BrowserRouter>
+							<ErrorBoundary>
+								<App />
+							</ErrorBoundary>
+						</BrowserRouter>
+					</ToastProvider>
+				</ThemeProvider>
+			</DemoAuthProvider>
 		</ClerkProvider>
 	</StrictMode>
 );

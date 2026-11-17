@@ -30,10 +30,16 @@ const toStoredBooking = (booking) => ({
 	createdAt: booking.createdAt,
 });
 
+const demoGuestBookings = userBookingsDummyData.slice(0, 2).map((booking) => ({
+	...toStoredBooking(booking),
+	userId: "demo_guest",
+	userName: "Demo Guest",
+}));
+
 const defaults = {
 	roomOverrides: {},
 	addedRooms: [],
-	bookings: userBookingsDummyData.map(toStoredBooking),
+	bookings: [...userBookingsDummyData.map(toStoredBooking), ...demoGuestBookings],
 	saved: [],
 	reviews: [],
 	searches: [],

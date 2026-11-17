@@ -1,27 +1,12 @@
 // Locale-independent formatting so dates and prices look the same on every device.
 
-const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
 export const toDay = (value: string | Date): string => String(value).slice(0, 10);
 
 export const todayIso = (): string => toDay(new Date().toISOString());
 
 export const formatDay = (value: string): string => {
-  const [year, month, day] = toDay(value).split('-').map(Number);
-  return `${MONTHS[month - 1]} ${day}, ${year}`;
+  const [year, month, day] = toDay(value).split('-');
+  return `${month}/${day}/${year}`;
 };
 
 export const formatCurrency = (value: number): string =>

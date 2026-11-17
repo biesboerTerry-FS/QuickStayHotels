@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
+import { useDemoUser } from "../context/DemoAuthContext";
 
 const Message = ({ title, text, children }) => (
 	<div className="flex flex-col items-center justify-center text-center px-6 py-32 min-h-[70vh]">
@@ -22,6 +23,7 @@ const RequireOwner = ({ children }) => {
 	const { user, isLoaded } = useUser();
 	const { openSignIn, signOut } = useClerk();
 	const location = useLocation();
+	const { isDemoUser, demoUser, startDemo, endDemo } = useDemoUser();
 
 	// Dev-only bypass: set VITE_DEV_OWNER_BYPASS=true in .env.local to skip auth
 	const devBypass =
@@ -31,7 +33,14 @@ const RequireOwner = ({ children }) => {
 		return children;
 	}
 
-	if (!isLoaded) {
+	const activeUser = user || (isDemoUser ? demoUser : null);
+	const isOwner = activeUser?.publicMetadata?.role === "hotelOwner";
+
+	if (isOwner) {
+		return children;
+	}
+
+	if (!isLoaded && !isDemoUser) {
 		return (
 			<div className="flex items-center justify-center min-h-[70vh]">
 				<h1 className="text-base font-normal text-gray-500">Loading…</h1>
@@ -39,11 +48,11 @@ const RequireOwner = ({ children }) => {
 		);
 	}
 
-	if (!user) {
+	if (!activeUser) {
 		return (
 			<Message
 				title="Sign in to continue"
-				text="The hotel dashboard is for registered hotel owners. Sign in with your account to manage listings and bookings."
+				text="The hotel dashboard is for registered hotel owners. Sign in with your account to manage listings and bookings, or try the owner demo."
 			>
 				<button
 					onClick={() =>
@@ -56,27 +65,44 @@ const RequireOwner = ({ children }) => {
 				>
 					Login
 				</button>
+				<button
+					onClick={() => startDemo("owner")}
+					className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+				>
+					Try owner demo
+				</button>
 			</Message>
 		);
 	}
 
-	if (user.publicMetadata?.role !== "hotelOwner") {
-		return (
-			<Message
-				title="Owner access required"
-				text="This account doesn't have hotel owner access. Ask a QuickStay administrator to enable it, or sign in with an owner account."
-			>
+	return (
+		<Message
+			title="Owner access required"
+			text="This account doesn't have hotel owner access. Ask a QuickStay administrator to enable it, sign in with an owner account, or try the owner demo."
+		>
+			{isDemoUser ? (
+				<button
+					onClick={endDemo}
+					className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+				>
+					Exit demo
+				</button>
+			) : (
 				<button
 					onClick={() => signOut({ redirectUrl: "/" })}
 					className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
 				>
 					Logout
 				</button>
-			</Message>
-		);
-	}
-
-	return children;
+			)}
+			<button
+				onClick={() => startDemo("owner")}
+				className="px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull transition-all cursor-pointer"
+			>
+				Try owner demo
+			</button>
+		</Message>
+	);
 };
 
 export default RequireOwner;

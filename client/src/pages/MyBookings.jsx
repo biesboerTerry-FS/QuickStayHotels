@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
+import { useDemoUser } from "../context/DemoAuthContext";
 import Title from "../components/Title";
 import EmptyState from "../components/EmptyState";
 import { assets } from "../assets/assets";
@@ -15,11 +16,13 @@ const MyBookings = () => {
 	useDocumentTitle("My Bookings");
 	const { user, isLoaded } = useUser();
 	const { openSignIn } = useClerk();
+	const { isDemoUser, demoUser, startDemo, endDemo } = useDemoUser();
 	const allBookings = useBookings();
 	const toast = useToast();
 
-	const bookings = user
-		? allBookings.filter((booking) => booking.userId === user.id)
+	const activeUser = user || (isDemoUser ? demoUser : null);
+	const bookings = activeUser
+		? allBookings.filter((booking) => booking.userId === activeUser.id)
 		: [];
 
 	const cancelBooking = (booking) => {
@@ -39,16 +42,34 @@ const MyBookings = () => {
 			"text/calendar"
 		);
 
-	if (isLoaded && !user) {
+	if (isLoaded && !activeUser) {
 		return (
 			<div className="flex flex-col items-center justify-center text-center px-6 py-40 min-h-[70vh]">
 				<h1 className="font-playfair text-3xl text-gray-800">Sign in to see your bookings</h1>
-				<button
-					onClick={() => openSignIn()}
-					className="mt-6 px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull cursor-pointer"
-				>
-					Login
-				</button>
+				<div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
+					<button
+						onClick={() => openSignIn()}
+						className="px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull cursor-pointer"
+					>
+						Login
+					</button>
+					{isDemoUser && (
+						<button
+							onClick={endDemo}
+							className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+						>
+							Exit demo
+						</button>
+					)}
+					{!isDemoUser && (
+						<button
+							onClick={() => startDemo("guest")}
+							className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+						>
+							Try demo
+						</button>
+					)}
+				</div>
 			</div>
 		);
 	}

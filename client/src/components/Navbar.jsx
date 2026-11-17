@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
 import ThemeToggle from "./ThemeToggle";
+import { useDemoUser } from "../context/DemoAuthContext";
 
 const BookIcon = () => (
 	<svg
@@ -54,6 +55,7 @@ const Navbar = () => {
 
 	const { openSignIn } = useClerk();
 	const { user } = useUser();
+	const { isDemoMode, isDemoUser, demoUser, startDemo, endDemo } = useDemoUser();
 
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -163,13 +165,35 @@ const Navbar = () => {
 
 				{user ? (
 					accountMenu
+				) : isDemoUser ? (
+					<div className="flex items-center gap-3 ml-4">
+						<span className="hidden lg:inline text-sm text-gray-600">
+							{demoUser.fullName}
+						</span>
+						<button
+							onClick={endDemo}
+							className="px-4 py-2 rounded-full border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+						>
+							Exit demo
+						</button>
+					</div>
 				) : (
-					<button
-						onClick={() => openSignIn()}
-						className="bg-primary hover:bg-primary-dull text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500 cursor-pointer"
-					>
-						Login
-					</button>
+					<div className="flex items-center gap-3 ml-4">
+						{isDemoMode && (
+							<button
+								onClick={() => startDemo("guest")}
+								className="hidden sm:inline px-4 py-2.5 rounded-full border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+							>
+								Try demo
+							</button>
+						)}
+						<button
+							onClick={() => openSignIn()}
+							className="bg-primary hover:bg-primary-dull text-white px-8 py-2.5 rounded-full transition-all duration-500 cursor-pointer"
+						>
+							Login
+						</button>
+					</div>
 				)}
 			</div>
 
@@ -177,6 +201,11 @@ const Navbar = () => {
 			<div className="flex items-center gap-3 md:hidden">
 				<ThemeToggle />
 				{user && accountMenu}
+				{isDemoUser && (
+					<span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+						Demo
+					</span>
+				)}
 				<button
 					type="button"
 					onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -224,19 +253,42 @@ const Navbar = () => {
 					</Link>
 				))}
 
-				{user && (
+				{(user || isDemoUser) && (
 					<Link to="/saved" onClick={() => setIsMenuOpen(false)}>
 						Saved rooms
 					</Link>
 				)}
 
-				{!user && (
+				{isDemoUser ? (
 					<button
-						onClick={() => openSignIn()}
-						className="bg-primary hover:bg-primary-dull text-white px-8 py-2.5 rounded-full transition-all duration-500 cursor-pointer"
+						onClick={() => {
+							endDemo();
+							setIsMenuOpen(false);
+						}}
+						className="px-6 py-2.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
 					>
-						Login
+						Exit demo
 					</button>
+				) : (
+					<div className="flex flex-col items-center gap-4">
+						{isDemoMode && (
+							<button
+								onClick={() => {
+									startDemo("guest");
+									setIsMenuOpen(false);
+								}}
+								className="px-8 py-2.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+							>
+								Try demo
+							</button>
+						)}
+						<button
+							onClick={() => openSignIn()}
+							className="bg-primary hover:bg-primary-dull text-white px-8 py-2.5 rounded-full transition-all duration-500 cursor-pointer"
+						>
+							Login
+						</button>
+					</div>
 				)}
 			</div>
 		</nav>
