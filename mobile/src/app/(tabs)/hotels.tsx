@@ -4,8 +4,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { Page } from '@/components/Page';
 import { BodyText, Button, Card, Chip, EmptyState, Field, Heading } from '@/components/ui';
 import { RoomGrid } from '@/components/RoomCard';
-import { rooms } from '@/data/catalog';
 import { useAppStore } from '@/store/AppStore';
+import { useApiRooms } from '@/hooks/useApiRooms';
 import { filterRooms, type SortOption } from '@/lib/roomFilters';
 import { isValidRange, nightsBetween } from '@/lib/bookings';
 import { formatDay } from '@/lib/format';
@@ -29,6 +29,7 @@ const first = (value: string | string[] | undefined) => (Array.isArray(value) ? 
 export default function HotelsScreen() {
   const params = useLocalSearchParams<{ destination?: string; checkIn?: string; checkOut?: string; guests?: string }>();
   const { bookings } = useAppStore();
+  const { rooms, loading, error: roomsError } = useApiRooms();
 
   const [destination, setDestination] = useState('');
   const [checkIn, setCheckIn] = useState('');
@@ -165,7 +166,11 @@ export default function HotelsScreen() {
         ) : null}
       </View>
 
-      {results.length === 0 ? (
+      {roomsError ? (
+        <BodyText style={{ color: '#b91c1c' }}>{roomsError}</BodyText>
+      ) : loading ? (
+        <BodyText muted>Loading rooms…</BodyText>
+      ) : results.length === 0 ? (
         <EmptyState
           title="No rooms match"
           message="Try another destination or dates, or clear the filters."

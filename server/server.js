@@ -8,6 +8,11 @@ import clerkWebhooks from "./controllers/clerkWebhooks.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import seedRoutes from "./routes/seedRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import { initSentry } from "./utils/sentry.js";
+
+initSentry();
 
 const app = express();
 
@@ -39,6 +44,8 @@ app.post("/api/clerk", clerkWebhooks);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/seed", seedRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.get("/", (request, response) => response.send("API is working, yo"));
 app.get("/health", (request, response) =>

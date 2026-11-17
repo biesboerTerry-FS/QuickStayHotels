@@ -5,7 +5,22 @@ import { useColorScheme } from 'react-native';
 export type ThemeMode = 'system' | 'light' | 'dark';
 
 // Every text/background pair below meets WCAG AA (4.5:1 for body text).
-const palettes = {
+export type Colors = {
+  background: string;
+  surface: string;
+  text: string;
+  muted: string;
+  border: string;
+  primary: string;
+  primaryText: string;
+  danger: string;
+  success: string;
+  warning: string;
+  chip: string;
+  overlay: string;
+};
+
+const palettes: { light: Colors; dark: Colors } = {
   light: {
     background: '#f8fafc',
     surface: '#ffffff',
@@ -34,9 +49,7 @@ const palettes = {
     chip: '#1e293b',
     overlay: 'rgba(0, 0, 0, 0.6)',
   },
-} as const;
-
-export type Colors = (typeof palettes)['light'];
+};
 
 type ThemeValue = {
   mode: ThemeMode;

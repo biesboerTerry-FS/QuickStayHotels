@@ -3,15 +3,17 @@ import { Alert, View } from 'react-native';
 import { router } from 'expo-router';
 import { Page } from '@/components/Page';
 import { BodyText, Button, Card, EmptyState, Heading, Row, useColumns } from '@/components/ui';
-import { findRoom } from '@/data/catalog';
+import { findRoom as findLocalRoom } from '@/data/catalog';
 import { useAppStore } from '@/store/AppStore';
 import { useTheme } from '@/theme/theme';
+import { useApiRooms } from '@/hooks/useApiRooms';
 import { bookingStatus, canCancel } from '@/lib/bookings';
 import { formatCurrency, formatDay } from '@/lib/format';
 
 export default function BookingsScreen() {
   const { colors } = useTheme();
   const { columns } = useColumns();
+  const { rooms } = useApiRooms();
   const { guest, bookings, updateBooking, signIn } = useAppStore();
 
   if (!guest) {
@@ -51,7 +53,7 @@ export default function BookingsScreen() {
       ) : null}
 
       {mine.map((booking) => {
-        const room = findRoom(booking.roomId);
+        const room = rooms.find((r) => r._id === booking.roomId) ?? findLocalRoom(booking.roomId);
         const status = bookingStatus(booking);
         const statusColor = status === 'Paid' ? colors.success : status === 'Cancelled' ? colors.muted : colors.warning;
         return (

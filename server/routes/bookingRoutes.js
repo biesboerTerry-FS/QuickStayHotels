@@ -1,5 +1,7 @@
 import express from "express";
 import Booking from "../models/Booking.js";
+import Room from "../models/Room.js";
+import { sendBookingConfirmation } from "../utils/mailer.js";
 
 const router = express.Router();
 
@@ -18,6 +20,20 @@ router.post("/", async (request, response) => {
 	try {
 		const booking = new Booking(request.body);
 		await booking.save();
+
+		const room = await Room.findById(booking.roomId);
+		if (room && request.body.userEmail) {
+			try {
+				await sendBookingConfirmation({
+					to: request.body.userEmail,
+					booking,
+					room,
+				});
+			} catch (emailError) {
+				console.error("Booking confirmation email failed:", emailError.message);
+			}
+		}
+
 		response.status(201).json({ success: true, booking });
 	} catch (error) {
 		response.status(400).json({ success: false, message: error.message });

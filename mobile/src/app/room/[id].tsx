@@ -4,16 +4,18 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Page } from '@/components/Page';
 import { averageRating, SaveButton } from '@/components/RoomCard';
 import { BodyText, Button, Card, Chip, EmptyState, Field, Heading, Row, StarRating } from '@/components/ui';
-import { findRoom, seedReviewsFor } from '@/data/catalog';
+import { findRoom as findLocalRoom, seedReviewsFor } from '@/data/catalog';
 import { useAppStore } from '@/store/AppStore';
 import { useTheme } from '@/theme/theme';
+import { useApiRooms } from '@/hooks/useApiRooms';
 import { isRoomFree, nightsBetween } from '@/lib/bookings';
 import { formatCurrency, formatDay, todayIso } from '@/lib/format';
 import { validateStay } from '@/lib/validation';
 
 export default function RoomScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const room = findRoom(id);
+  const { rooms, loading } = useApiRooms();
+  const room = rooms.find((r) => r._id === id) ?? findLocalRoom(id);
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
   const { bookings, reviews, addReview, guest } = useAppStore();
@@ -26,6 +28,14 @@ export default function RoomScreen() {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [reviewError, setReviewError] = useState<string | null>(null);
+
+  if (loading) {
+    return (
+      <Page>
+        <BodyText muted>Loading room…</BodyText>
+      </Page>
+    );
+  }
 
   if (!room) {
     return (

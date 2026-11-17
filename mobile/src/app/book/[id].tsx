@@ -3,13 +3,14 @@ import { Pressable, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Page } from '@/components/Page';
 import { BodyText, Button, Card, EmptyState, Heading, Row } from '@/components/ui';
-import { findRoom } from '@/data/catalog';
+import { findRoom as findLocalRoom } from '@/data/catalog';
 import type { StoredBooking } from '@/data/types';
 import { useAppStore } from '@/store/AppStore';
 import { useTheme } from '@/theme/theme';
 import { createBooking, isRoomFree, nightsBetween } from '@/lib/bookings';
 import { formatCurrency, formatDay } from '@/lib/format';
 import { validateStay } from '@/lib/validation';
+import { useApiRooms } from '@/hooks/useApiRooms';
 
 const paymentOptions: { value: StoredBooking['paymentMethod']; label: string; note: string }[] = [
   { value: 'Pay At Hotel', label: 'Pay at the hotel', note: 'No payment now. Pay when you check in.' },
@@ -18,11 +19,20 @@ const paymentOptions: { value: StoredBooking['paymentMethod']; label: string; no
 
 export default function BookRoomScreen() {
   const params = useLocalSearchParams<{ id: string; checkIn: string; checkOut: string; guests: string }>();
-  const room = findRoom(params.id);
+  const { rooms, loading } = useApiRooms();
+  const room = rooms.find((r) => r._id === params.id) ?? findLocalRoom(params.id);
   const { colors } = useTheme();
   const { guest, bookings, addBooking, signIn } = useAppStore();
   const [payment, setPayment] = useState<StoredBooking['paymentMethod']>('Pay At Hotel');
   const [error, setError] = useState<string | null>(null);
+
+  if (loading) {
+    return (
+      <Page>
+        <BodyText muted>Loading room…</BodyText>
+      </Page>
+    );
+  }
 
   if (!room) {
     return (

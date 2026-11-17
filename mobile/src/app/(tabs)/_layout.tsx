@@ -19,9 +19,9 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarActiveTintColor: colors.primary as string,
+        tabBarInactiveTintColor: colors.muted as string,
+        tabBarStyle: { backgroundColor: colors.surface as string, borderTopColor: colors.border as string },
       }}
     >
       {tabs.map((tab) => (
@@ -32,7 +32,7 @@ export default function TabLayout() {
             title: tab.title,
             tabBarAccessibilityLabel: tab.a11y,
             tabBarIcon: ({ focused, color, size }) => (
-              <Ionicons name={focused ? tab.iconActive : tab.icon} size={size} color={color} />
+              <Ionicons name={focused ? tab.iconActive : tab.icon} size={size} color={color as string} />
             ),
           }}
         />

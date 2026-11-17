@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.31.6",
+    "@sentry/react": "^11.13.0",
     "@tailwindcss/vite": "^4.1.7",
     "@vercel/analytics": "^1.6.1",
     "@vercel/speed-insights": "^1.2.0",

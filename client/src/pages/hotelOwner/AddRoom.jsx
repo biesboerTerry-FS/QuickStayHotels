@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Title from "../../components/Title";
+import ImageUpload from "../../components/ImageUpload";
 import { setState } from "../../data/store";
 import { useToast } from "../../context/ToastContext";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -20,6 +21,7 @@ const emptyForm = {
 	pricePerNight: "",
 	maxGuests: "2",
 	amenities: [],
+	images: [],
 };
 
 const AddRoom = () => {
@@ -64,6 +66,9 @@ const AddRoom = () => {
 			pricePerNight: Number(form.pricePerNight),
 			maxGuests: Number(form.maxGuests),
 			amenities: form.amenities,
+			images: form.images.length
+				? form.images
+				: ["https://placehold.co/600x400?text=QuickStay+Room"],
 			isAvailable: true,
 			createdAt: now,
 			updatedAt: now,
@@ -150,6 +155,38 @@ const AddRoom = () => {
 						))}
 					</div>
 				</fieldset>
+
+				<div>
+					<label className="text-sm font-medium text-gray-800">Photos</label>
+					<div className="flex flex-wrap gap-3 mt-3">
+						{form.images.map((url, index) => (
+							<div key={index} className="relative">
+								<img
+									src={url}
+									alt={`Uploaded ${index + 1}`}
+									className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+								/>
+								<button
+									type="button"
+									onClick={() =>
+										setForm((prev) => ({
+											...prev,
+											images: prev.images.filter((_, i) => i !== index),
+										}))
+									}
+									className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs"
+								>
+									×
+								</button>
+							</div>
+						))}
+						<ImageUpload
+							onUpload={(url) =>
+								setForm((prev) => ({ ...prev, images: [...prev.images, url] }))
+							}
+						/>
+					</div>
+				</div>
 			</div>
 
 			<div className="flex items-center gap-3 mt-8">
@@ -168,7 +205,7 @@ const AddRoom = () => {
 				</button>
 			</div>
 			<p className="text-xs text-gray-500 mt-4">
-				Rooms are saved on this device for now. Photo uploads will arrive with the server storage.
+				Rooms are saved on this device for now. Photo uploads require Cloudinary credentials on the server.
 			</p>
 		</form>
 	);

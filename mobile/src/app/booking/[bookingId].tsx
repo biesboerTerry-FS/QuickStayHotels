@@ -3,15 +3,17 @@ import { Linking, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Page } from '@/components/Page';
 import { BodyText, Button, Card, EmptyState, Heading, Row } from '@/components/ui';
-import { findRoom } from '@/data/catalog';
+import { findRoom as findLocalRoom } from '@/data/catalog';
 import { useAppStore } from '@/store/AppStore';
 import { useTheme } from '@/theme/theme';
+import { useApiRooms } from '@/hooks/useApiRooms';
 import { bookingStatus, canCancel } from '@/lib/bookings';
 import { formatCurrency, formatDay } from '@/lib/format';
 
 export default function BookingDetailScreen() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const { colors } = useTheme();
+  const { rooms } = useApiRooms();
   const { bookings, updateBooking } = useAppStore();
   const booking = bookings.find((item) => item._id === bookingId);
 
@@ -23,7 +25,7 @@ export default function BookingDetailScreen() {
     );
   }
 
-  const room = findRoom(booking.roomId);
+  const room = rooms.find((r) => r._id === booking.roomId) ?? findLocalRoom(booking.roomId);
   const status = bookingStatus(booking);
   const cancelled = booking.status === 'cancelled';
 

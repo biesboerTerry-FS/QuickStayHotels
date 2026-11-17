@@ -4,9 +4,10 @@ import { router } from 'expo-router';
 import { Page } from '@/components/Page';
 import { BodyText, Button, Card, Chip, Field, Heading, useColumns } from '@/components/ui';
 import { RoomGrid } from '@/components/RoomCard';
-import { cities, rooms } from '@/data/catalog';
+import { cities } from '@/data/catalog';
 import { useAppStore } from '@/store/AppStore';
 import { useTheme } from '@/theme/theme';
+import { useApiRooms } from '@/hooks/useApiRooms';
 import { validateStay } from '@/lib/validation';
 import heroImage from '../../../assets/images/heroImage.png';
 
@@ -14,6 +15,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { columns } = useColumns();
   const { searches, addSearch } = useAppStore();
+  const { rooms, loading, error: roomsError } = useApiRooms();
   const [destination, setDestination] = useState('');
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
@@ -109,9 +111,9 @@ export default function HomeScreen() {
             />
           </View>
         </View>
-        {error ? (
+        {error || roomsError ? (
           <Text accessibilityLiveRegion="polite" style={{ color: colors.danger }}>
-            {error}
+            {error || roomsError}
           </Text>
         ) : null}
         <Button label="Search hotels" onPress={submit} />
@@ -143,8 +145,14 @@ export default function HomeScreen() {
         <Heading level={2}>Featured destinations</Heading>
         <BodyText muted>Hand-picked stays across our partner cities.</BodyText>
       </View>
-      <RoomGrid rooms={featured} />
-      <Button label="View all hotels" variant="secondary" onPress={() => router.push('/hotels')} />
+      {loading ? (
+        <BodyText muted>Loading featured rooms…</BodyText>
+      ) : (
+        <>
+          <RoomGrid rooms={featured} />
+          <Button label="View all hotels" variant="secondary" onPress={() => router.push('/hotels')} />
+        </>
+      )}
     </Page>
   );
 }

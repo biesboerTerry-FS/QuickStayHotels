@@ -2,13 +2,17 @@ import React from 'react';
 import { Page } from '@/components/Page';
 import { Button, EmptyState, Heading, BodyText } from '@/components/ui';
 import { RoomGrid } from '@/components/RoomCard';
-import { findRoom } from '@/data/catalog';
+import { findRoom as findLocalRoom } from '@/data/catalog';
 import { useAppStore } from '@/store/AppStore';
+import { useApiRooms } from '@/hooks/useApiRooms';
 import { router } from 'expo-router';
 
 export default function SavedScreen() {
   const { saved } = useAppStore();
-  const rooms = saved.map(findRoom).filter((room) => room !== undefined);
+  const { rooms: apiRooms } = useApiRooms();
+  const rooms = saved
+    .map((id) => apiRooms.find((r) => r._id === id) ?? findLocalRoom(id))
+    .filter((room): room is NonNullable<typeof room> => room !== undefined);
 
   return (
     <Page>
