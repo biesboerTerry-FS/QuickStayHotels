@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { assets, cities } from "../assets/assets";
 import heroImage from "../assets/heroImage.png";
 import { setState, useStore } from "../data/store";
+import DateInput from "../components/DateInput";
 
 const inputClass =
 	"rounded-lg border border-white/60 bg-white/80 px-3 py-2 mt-1.5 text-sm text-gray-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all";
@@ -99,13 +100,13 @@ const Hero = () => {
 						<img src={assets.calenderIcon} alt="" className="h-4" />
 						<label htmlFor="checkIn">Check in</label>
 					</div>
-					<input
+					<DateInput
 						id="checkIn"
-						type="date"
+						label="Check in"
 						value={search.checkIn}
 						onChange={updateSearch("checkIn")}
 						min={new Date().toISOString().slice(0, 10)}
-						className={inputClass}
+						className="mt-1.5"
 					/>
 				</div>
 
@@ -114,13 +115,13 @@ const Hero = () => {
 						<img src={assets.calenderIcon} alt="" className="h-4" />
 						<label htmlFor="checkOut">Check out</label>
 					</div>
-					<input
+					<DateInput
 						id="checkOut"
-						type="date"
+						label="Check out"
 						value={search.checkOut}
 						onChange={updateSearch("checkOut")}
 						min={search.checkIn || new Date().toISOString().slice(0, 10)}
-						className={inputClass}
+						className="mt-1.5"
 					/>
 				</div>
 

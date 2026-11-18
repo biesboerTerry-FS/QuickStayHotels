@@ -4,6 +4,7 @@ import { useClerk, useUser } from "@clerk/clerk-react";
 import { assets, facilityIcons, roomCommonData } from "../assets/assets";
 import StarRating from "../components/StarRating";
 import SaveButton from "../components/SaveButton";
+import DateInput from "../components/DateInput";
 import {
 	setState,
 	summarizeReviews,
@@ -229,13 +230,14 @@ const RoomDetails = () => {
 						<label htmlFor="checkInDate" className="font-medium">
 							Check-in
 						</label>
-						<input
-							type="date"
+						<DateInput
 							id="checkInDate"
+							label="Check-in"
 							value={stay.checkIn}
 							min={todayIso()}
 							onChange={(e) => setStay({ ...stay, checkIn: e.target.value })}
-							className={`${inputClass} md:w-44`}
+							className="mt-1.5 md:w-56"
+							inputClassName="border-gray-300"
 							required
 						/>
 					</div>
@@ -245,13 +247,14 @@ const RoomDetails = () => {
 						<label htmlFor="checkOutDate" className="font-medium">
 							Check-out
 						</label>
-						<input
-							type="date"
+						<DateInput
 							id="checkOutDate"
+							label="Check-out"
 							value={stay.checkOut}
 							min={stay.checkIn || todayIso()}
 							onChange={(e) => setStay({ ...stay, checkOut: e.target.value })}
-							className={`${inputClass} md:w-44`}
+							className="mt-1.5 md:w-56"
+							inputClassName="border-gray-300"
 							required
 						/>
 					</div>
