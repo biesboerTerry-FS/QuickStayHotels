@@ -186,3 +186,8 @@
 .dark img[alt="close menu"] {
 	filter: invert(1);
 }
+
+/* Amenity icons with hard-coded black strokes/fills become light in dark mode. */
+.dark img.amenity-icon {
+	filter: invert(1) brightness(1.5);
+}

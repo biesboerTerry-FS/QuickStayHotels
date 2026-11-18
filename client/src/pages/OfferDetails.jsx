@@ -23,7 +23,7 @@ const OfferDetails = () => {
 				to="/offers"
 				className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors mb-6"
 			>
-				<img src={assets.arrowIcon} alt="" className="w-3 rotate-180" />
+				<img src={assets.arrowIcon} alt="" className="w-3 rotate-180 dark:invert" />
 				Back to offers
 			</Link>
 

@@ -75,7 +75,7 @@ const Hero = () => {
 			>
 				<div>
 					<div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-						<img src={assets.calenderIcon} alt="" className="h-4" />
+						<img src={assets.calenderIcon} alt="" className="h-4 dark:invert" />
 						<label htmlFor="destinationInput">Destination</label>
 					</div>
 					<input
@@ -97,7 +97,7 @@ const Hero = () => {
 
 				<div>
 					<div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-						<img src={assets.calenderIcon} alt="" className="h-4" />
+						<img src={assets.calenderIcon} alt="" className="h-4 dark:invert" />
 						<label htmlFor="checkIn">Check in</label>
 					</div>
 					<DateInput
@@ -112,7 +112,7 @@ const Hero = () => {
 
 				<div>
 					<div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-						<img src={assets.calenderIcon} alt="" className="h-4" />
+						<img src={assets.calenderIcon} alt="" className="h-4 dark:invert" />
 						<label htmlFor="checkOut">Check out</label>
 					</div>
 					<DateInput

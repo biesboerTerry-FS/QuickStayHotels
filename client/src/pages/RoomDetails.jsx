@@ -209,7 +209,7 @@ const RoomDetails = () => {
 								key={item}
 								className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100"
 							>
-								<img src={facilityIcons[item]} alt={item} className="w-5 h-5" />
+								<img src={facilityIcons[item]} alt={item} className="w-5 h-5 amenity-icon" />
 								<p className="text-xs">{item}</p>
 							</div>
 						))}
@@ -301,7 +301,7 @@ const RoomDetails = () => {
 			<div className="mt-20 space-y-4">
 				{roomCommonData.map((spec) => (
 					<div key={spec.title} className="flex items-start gap-2">
-						<img src={spec.icon} alt="" className="w-6.5" />
+						<img src={spec.icon} alt="" className="w-6.5 dark:invert" />
 						<div>
 							<p className="text-base">{spec.title}</p>
 							<p className="text-gray-500">{spec.description}</p>

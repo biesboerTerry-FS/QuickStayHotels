@@ -240,7 +240,7 @@ const AllRooms = () => {
 										<img
 											src={facilityIcons[item]}
 											alt={item}
-											className="w-5 h-5"
+											className="w-5 h-5 amenity-icon"
 										/>
 										<p className="text-xs">{item}</p>
 									</div>

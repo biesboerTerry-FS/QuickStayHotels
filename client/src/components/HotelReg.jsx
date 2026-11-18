@@ -14,7 +14,7 @@ const HotelReg = () => {
 					<img
 						src={assets.closeIcon}
 						alt="close-icon"
-						className="absolute top-4 right-4 h-4 w-4 cursor-pointer"
+						className="absolute top-4 right-4 h-4 w-4 cursor-pointer dark:invert"
 					/>
 					<p className="text-2xl font-semibold mt-6">
 						Register Your Hotel

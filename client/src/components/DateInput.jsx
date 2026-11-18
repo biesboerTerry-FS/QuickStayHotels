@@ -37,7 +37,7 @@ const DateInput = ({
 				className="absolute right-3 p-1 hover:bg-black/5 rounded transition-colors cursor-pointer"
 				aria-label={`Open date picker for ${label}`}
 			>
-				<img src={assets.calenderIcon} alt="" className="h-4 w-4" />
+				<img src={assets.calenderIcon} alt="" className="h-4 w-4 dark:invert" />
 			</button>
 		</div>
 	);
