@@ -10,7 +10,9 @@ import { ToastProvider } from "./context/ToastContext.jsx";
 import { DemoAuthProvider } from "./context/DemoAuthContext.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const PUBLISHABLE_KEY =
+	import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+	import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
 
 if (SENTRY_DSN) {
