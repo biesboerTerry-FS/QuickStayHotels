@@ -17,10 +17,14 @@ initSentry();
 const app = express();
 
 //^ CORS: allow local dev and the configured frontend origin
-const allowedOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+	.split(",")
+	.map((origin) => origin.trim())
+	.filter(Boolean);
+
 app.use(
 	cors({
-		origin: allowedOrigin,
+		origin: allowedOrigins,
 		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 		credentials: true,
 	})
