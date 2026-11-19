@@ -32,7 +32,7 @@ app.use(
 
 //^ middleware
 app.use(express.json());
-app.use(clerkMiddleware());
+app.use(clerkMiddleware({ authorizedParties: allowedOrigins }));
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
