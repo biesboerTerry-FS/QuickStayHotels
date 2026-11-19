@@ -11,6 +11,7 @@ import SavedRooms from "./pages/SavedRooms";
 import BookingPage from "./pages/BookingPage";
 import BookingConfirmed from "./pages/BookingConfirmed";
 import PaymentPage from "./pages/PaymentPage";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import Layout from "./pages/hotelOwner/Layout";
 import Dashboard from "./pages/hotelOwner/Dashboard";
 import AddRoom from "./pages/hotelOwner/AddRoom";
@@ -61,6 +62,7 @@ const App = () => {
 						element={<BookingConfirmed />}
 					/>
 					<Route path="/pay/:bookingId" element={<PaymentPage />} />
+					<Route path="/pay/success" element={<PaymentSuccess />} />
 					<Route path="/my-bookings" element={<MyBookings />} />
 					<Route path="/saved" element={<SavedRooms />} />
 					<Route path="/offers" element={<Offers />} />

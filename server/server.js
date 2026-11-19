@@ -11,6 +11,15 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import seedRoutes from "./routes/seedRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import { initSentry } from "./utils/sentry.js";
+import Stripe from "stripe";
+
+let stripeClient;
+const getStripe = () => {
+	if (!stripeClient) {
+		stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
+	}
+	return stripeClient;
+};
 
 initSentry();
 
@@ -43,6 +52,42 @@ app.use(limiter);
 
 //^ api to listen for clerk webhooks
 app.post("/api/clerk", clerkWebhooks);
+
+//^ Stripe Checkout (test mode demo) for booking payments
+app.post("/api/create-checkout-session", async (request, response) => {
+	try {
+		const { bookingId, hotelName, total } = request.body || {};
+		const amount = Math.max(0, Math.round(Number(total) * 100));
+		if (!amount) {
+			return response.status(400).json({ message: "Invalid booking total" });
+		}
+
+		const origin = request.headers.origin || allowedOrigins[0];
+		const session = await getStripe().checkout.sessions.create({
+			mode: "payment",
+			line_items: [
+				{
+					price_data: {
+						currency: "usd",
+						product_data: {
+							name: `Stay at ${hotelName || "QuickStay Hotel"}`,
+						},
+						unit_amount: amount,
+					},
+					quantity: 1,
+				},
+			],
+			success_url: `${origin}/pay/success?bookingId=${encodeURIComponent(bookingId || "")}`,
+			cancel_url: `${origin}/pay/${encodeURIComponent(bookingId || "")}`,
+			metadata: { bookingId: String(bookingId || "") },
+		});
+
+		return response.json({ url: session.url });
+	} catch (error) {
+		console.error("Stripe checkout error:", error.message);
+		return response.status(500).json({ message: error.message });
+	}
+});
 
 //^ resource routes
 app.use("/api/rooms", roomRoutes);
