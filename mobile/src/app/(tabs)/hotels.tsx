@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Page } from '@/components/Page';
+import { DateField } from '@/components/DateField';
 import { BodyText, Button, Card, Chip, EmptyState, Field, Heading } from '@/components/ui';
 import { RoomGrid } from '@/components/RoomCard';
 import { useAppStore } from '@/store/AppStore';
 import { useApiRooms } from '@/hooks/useApiRooms';
 import { filterRooms, type SortOption } from '@/lib/roomFilters';
 import { isValidRange, nightsBetween } from '@/lib/bookings';
-import { formatDay } from '@/lib/format';
+import { addDaysIso, formatDay } from '@/lib/format';
 import { validateStay } from '@/lib/validation';
 
 const roomTypes = ['Single Bed', 'Double Bed', 'Family Suite', 'Luxury Room'];
@@ -113,10 +114,15 @@ export default function HotelsScreen() {
             <Field label="Destination" value={destination} onChangeText={setDestination} placeholder="Any city" />
             <View style={styles.row}>
               <View style={styles.flex}>
-                <Field label="Check in" value={checkIn} onChangeText={setCheckIn} placeholder="YYYY-MM-DD" maxLength={10} />
+                <DateField label="Check in" value={checkIn} onChange={setCheckIn} />
               </View>
               <View style={styles.flex}>
-                <Field label="Check out" value={checkOut} onChangeText={setCheckOut} placeholder="YYYY-MM-DD" maxLength={10} />
+                <DateField
+                  label="Check out"
+                  value={checkOut}
+                  onChange={setCheckOut}
+                  minDate={checkIn ? addDaysIso(checkIn, 1) : undefined}
+                />
               </View>
             </View>
             <Field label="Guests" value={guests} onChangeText={setGuests} placeholder="Any" keyboardType="number-pad" maxLength={1} />

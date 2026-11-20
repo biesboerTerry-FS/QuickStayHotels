@@ -8,7 +8,7 @@ export const validateStay = (
 ): string | null => {
   if (requireDates || checkIn || checkOut) {
     if (!isValidDayString(checkIn) || !isValidDayString(checkOut)) {
-      return 'Enter both dates as YYYY-MM-DD.';
+      return 'Choose both dates in DD/MM/YYYY format.';
     }
     if (checkIn < todayIso()) return "Check-in can't be in the past.";
     if (!isValidRange(checkIn, checkOut)) return 'Check-out must be at least one night after check-in.';

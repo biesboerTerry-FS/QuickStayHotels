@@ -3,13 +3,14 @@ import { Image, Linking, ScrollView, StyleSheet, Text, View, useWindowDimensions
 import { router, useLocalSearchParams } from 'expo-router';
 import { Page } from '@/components/Page';
 import { averageRating, SaveButton } from '@/components/RoomCard';
+import { DateField } from '@/components/DateField';
 import { BodyText, Button, Card, Chip, EmptyState, Field, Heading, Row, StarRating } from '@/components/ui';
 import { findRoom as findLocalRoom, seedReviewsFor } from '@/data/catalog';
 import { useAppStore } from '@/store/AppStore';
 import { useTheme } from '@/theme/theme';
 import { useApiRooms } from '@/hooks/useApiRooms';
 import { isRoomFree, nightsBetween } from '@/lib/bookings';
-import { formatCurrency, formatDay, todayIso } from '@/lib/format';
+import { addDaysIso, formatCurrency, formatDay, todayIso } from '@/lib/format';
 import { validateStay } from '@/lib/validation';
 
 export default function RoomScreen() {
@@ -152,21 +153,12 @@ export default function RoomScreen() {
 
       <Card style={{ gap: 4 }}>
         <Heading level={2}>Check availability</Heading>
-        <Field
-          label="Check in"
-          placeholder="YYYY-MM-DD"
-          value={checkIn}
-          onChangeText={setCheckIn}
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-        />
-        <Field
+        <DateField label="Check in" value={checkIn} onChange={setCheckIn} />
+        <DateField
           label="Check out"
-          placeholder="YYYY-MM-DD"
           value={checkOut}
-          onChangeText={setCheckOut}
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
+          onChange={setCheckOut}
+          minDate={checkIn ? addDaysIso(checkIn, 1) : undefined}
         />
         <Field
           label="Guests"

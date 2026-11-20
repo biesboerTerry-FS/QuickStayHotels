@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Page } from '@/components/Page';
+import { DateField } from '@/components/DateField';
+import { addDaysIso, formatDay } from '@/lib/format';
 import { BodyText, Button, Card, Chip, Field, Heading, useColumns } from '@/components/ui';
 import { RoomGrid } from '@/components/RoomCard';
 import { cities } from '@/data/catalog';
@@ -81,23 +83,14 @@ export default function HomeScreen() {
         </View>
         <View style={[styles.dateRow, columns > 1 && styles.dateRowWide]}>
           <View style={styles.flex}>
-            <Field
-              label="Check in"
-              placeholder="YYYY-MM-DD"
-              value={checkIn}
-              onChangeText={setCheckIn}
-              keyboardType="numbers-and-punctuation"
-              maxLength={10}
-            />
+            <DateField label="Check in" value={checkIn} onChange={setCheckIn} />
           </View>
           <View style={styles.flex}>
-            <Field
+            <DateField
               label="Check out"
-              placeholder="YYYY-MM-DD"
               value={checkOut}
-              onChangeText={setCheckOut}
-              keyboardType="numbers-and-punctuation"
-              maxLength={10}
+              onChange={setCheckOut}
+              minDate={checkIn ? addDaysIso(checkIn, 1) : undefined}
             />
           </View>
           <View style={styles.guestField}>
@@ -127,13 +120,13 @@ export default function HomeScreen() {
               <Pressable
                 key={`${item.destination}-${item.checkIn}-${item.checkOut}-${item.savedAt}`}
                 accessibilityRole="button"
-                accessibilityLabel={`Search again: ${item.destination}${item.checkIn ? `, ${item.checkIn} to ${item.checkOut}` : ''}`}
+                accessibilityLabel={`Search again: ${item.destination}${item.checkIn ? `, ${formatDay(item.checkIn)} to ${formatDay(item.checkOut)}` : ''}`}
                 onPress={() => search(item)}
                 style={[styles.recent, { borderColor: colors.border, backgroundColor: colors.surface }]}
               >
                 <Text style={{ color: colors.text, fontWeight: '500' }}>
                   {item.destination}
-                  {item.checkIn ? ` · ${item.checkIn}` : ''}
+                  {item.checkIn ? ` · ${formatDay(item.checkIn)}` : ''}
                 </Text>
               </Pressable>
             ))}
