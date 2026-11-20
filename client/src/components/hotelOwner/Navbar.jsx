@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { assets } from "../../assets/assets";
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { useClerk, useUser } from "@clerk/react";
 import ThemeToggle from "../ThemeToggle";
 
 const Navbar = () => {

@@ -1,6 +1,6 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useClerk, useUser } from "@clerk/react";
 import { useDemoUser } from "../context/DemoAuthContext";
 
 const Message = ({ title, text, children }) => (
@@ -23,7 +23,13 @@ const RequireOwner = ({ children }) => {
 	const { user, isLoaded } = useUser();
 	const { openSignIn, signOut } = useClerk();
 	const location = useLocation();
+	const navigate = useNavigate();
 	const { isDemoUser, demoUser, startDemo, endDemo } = useDemoUser();
+
+	const enterOwnerDemo = () => {
+		startDemo("owner");
+		navigate("/owner");
+	};
 
 	// Dev-only bypass: set VITE_DEV_OWNER_BYPASS=true in .env.local to skip auth
 	const devBypass =
@@ -66,7 +72,7 @@ const RequireOwner = ({ children }) => {
 					Login
 				</button>
 				<button
-					onClick={() => startDemo("owner")}
+					onClick={enterOwnerDemo}
 					className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
 				>
 					Try owner demo
@@ -96,7 +102,7 @@ const RequireOwner = ({ children }) => {
 				</button>
 			)}
 			<button
-				onClick={() => startDemo("owner")}
+				onClick={enterOwnerDemo}
 				className="px-6 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dull transition-all cursor-pointer"
 			>
 				Try owner demo

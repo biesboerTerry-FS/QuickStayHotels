@@ -5,7 +5,9 @@ import { toDay } from "../lib/format";
 import { catalogRooms } from "../data/catalog";
 
 const DEMO_KEY = "quickstay:demo";
-const DEMO_ENABLED = import.meta.env.VITE_DEMO_MODE === "true";
+// Demo sign-in is enabled by default so the "Try demo" / "Try owner demo" buttons
+// work on every deployment. Set VITE_DEMO_MODE=false to opt out explicitly.
+const DEMO_ENABLED = import.meta.env.VITE_DEMO_MODE !== "false";
 
 const demoUsers = {
 	guest: {

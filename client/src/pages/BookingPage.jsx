@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { useClerk, useUser } from "@clerk/react";
 import { useDemoUser } from "../context/DemoAuthContext";
 import { assets } from "../assets/assets";
 import { offers } from "../data/offers";

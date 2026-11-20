@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
-import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
+import { useClerk, useUser, UserButton } from "@clerk/react";
 import ThemeToggle from "./ThemeToggle";
 import { useDemoUser } from "../context/DemoAuthContext";
 
@@ -55,9 +55,15 @@ const Navbar = () => {
 
 	const { openSignIn } = useClerk();
 	const { user } = useUser();
-	const { isDemoMode, isDemoUser, demoUser, startDemo, endDemo } = useDemoUser();
+	const { isDemoMode, isDemoUser, isDemoOwner, demoUser, startDemo, endDemo } = useDemoUser();
 
 	const navigate = useNavigate();
+
+	const enterOwnerDemo = () => {
+		startDemo("owner");
+		setIsMenuOpen(false);
+		navigate("/owner");
+	};
 	const location = useLocation();
 
 	useEffect(() => {
@@ -187,6 +193,14 @@ const Navbar = () => {
 								Try demo
 							</button>
 						)}
+						{isDemoMode && !isDemoOwner && (
+							<button
+								onClick={enterOwnerDemo}
+								className="hidden lg:inline px-4 py-2.5 rounded-full border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+							>
+								Owner demo
+							</button>
+						)}
 						<button
 							onClick={() => openSignIn()}
 							className="bg-primary hover:bg-primary-dull text-white px-8 py-2.5 rounded-full transition-all duration-500 cursor-pointer"
@@ -280,6 +294,14 @@ const Navbar = () => {
 								className="px-8 py-2.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
 							>
 								Try demo
+							</button>
+						)}
+						{isDemoMode && !isDemoOwner && (
+							<button
+								onClick={enterOwnerDemo}
+								className="px-8 py-2.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+							>
+								Owner demo
 							</button>
 						)}
 						<button
