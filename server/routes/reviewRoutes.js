@@ -1,8 +1,11 @@
 import express from "express";
 import Review from "../models/Review.js";
+import { protect } from "../middleware/auth.js";
+import { validateReview } from "../middleware/validate.js";
 
 const router = express.Router();
 
+// Public browse: reviews are readable by anyone.
 router.get("/", async (request, response) => {
 	try {
 		const { roomId } = request.query;
@@ -14,7 +17,8 @@ router.get("/", async (request, response) => {
 	}
 });
 
-router.post("/", async (request, response) => {
+// Posting a review is a state change and requires a token.
+router.post("/", protect, validateReview, async (request, response) => {
 	try {
 		const review = new Review(request.body);
 		await review.save();

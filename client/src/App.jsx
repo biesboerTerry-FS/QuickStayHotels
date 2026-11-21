@@ -27,6 +27,9 @@ import OfferDetails from "./pages/OfferDetails";
 import RequireOwner from "./components/RequireOwner";
 import RequireEmployee from "./components/RequireEmployee";
 import EmployeePortal from "./pages/employee/EmployeePortal";
+import EmployeeLayout from "./pages/employee/Layout";
+import PortalMessages from "./pages/portal/Messages";
+import PortalSchedule from "./pages/portal/Schedule";
 import CookieBanner from "./components/CookieBanner";
 import { infoPages } from "./data/infoPages";
 
@@ -77,10 +80,15 @@ const App = () => {
 						path="/employee"
 						element={
 							<RequireEmployee>
-								<EmployeePortal />
+								<EmployeeLayout />
 							</RequireEmployee>
 						}
-					/>
+					>
+						<Route index element={<EmployeePortal />} />
+						<Route path="orders" element={<Bookings />} />
+						<Route path="messages" element={<PortalMessages role="employee" />} />
+						<Route path="schedule" element={<PortalSchedule role="employee" />} />
+					</Route>
 					{Object.keys(infoPages).map((slug) => (
 						<Route
 							key={slug}
@@ -100,6 +108,9 @@ const App = () => {
 						<Route path="add-room" element={<AddRoom />} />
 						<Route path="list-rooms" element={<ListRooms />} />
 						<Route path="bookings" element={<Bookings />} />
+						<Route path="orders" element={<Bookings />} />
+						<Route path="messages" element={<PortalMessages role="owner" />} />
+						<Route path="schedule" element={<PortalSchedule role="owner" />} />
 						<Route path="offers" element={<OwnerOffers />} />
 						<Route path="announcements" element={<Announcements />} />
 						<Route path="profile" element={<HotelProfile />} />

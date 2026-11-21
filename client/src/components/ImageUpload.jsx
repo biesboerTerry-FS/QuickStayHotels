@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useToast } from "../context/ToastContext";
+import { apiFetch } from "../lib/api";
 
 const ImageUpload = ({ onUpload, className = "" }) => {
 	const [uploading, setUploading] = useState(false);
@@ -11,7 +12,7 @@ const ImageUpload = ({ onUpload, className = "" }) => {
 
 		setUploading(true);
 		try {
-			const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ""}/api/upload`, {
+			const response = await apiFetch("/api/upload", {
 				method: "POST",
 				body: file,
 				headers: {

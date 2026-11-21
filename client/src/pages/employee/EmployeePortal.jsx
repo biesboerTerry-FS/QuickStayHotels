@@ -11,6 +11,7 @@ import {
 	useEmployee,
 } from "../../lib/employees";
 import { formatDay } from "../../lib/format";
+import PendingBookingsWidget from "../../components/portal/PendingBookingsWidget";
 
 const pickEditable = (employee) => ({
 	fullName: employee?.fullName || "",
@@ -36,7 +37,7 @@ const Detail = ({ label, value, testId }) => (
 const EmployeePortal = () => {
 	useDocumentTitle("Employee Portal");
 	const toast = useToast();
-	const { demoUser, isDemoUser, endDemo } = useDemoUser();
+	const { demoUser } = useDemoUser();
 	const employeeId = demoUser?.employeeId || DEMO_EMPLOYEE_ID;
 	const employee = useEmployee(employeeId);
 	const [editing, setEditing] = useState(false);
@@ -88,38 +89,7 @@ const EmployeePortal = () => {
 	);
 
 	return (
-		<div className="min-h-screen bg-gray-50">
-			<header className="border-b border-gray-200 bg-white">
-				<div className="max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between gap-4">
-					<div className="flex items-center gap-3">
-						<span className="font-playfair text-xl text-gray-800">QuickStay</span>
-						<span className="text-xs font-medium bg-primary/10 text-primary rounded-full px-3 py-1">
-							Employee portal
-						</span>
-					</div>
-					<div className="flex items-center gap-3">
-						<span className="hidden sm:inline text-sm text-gray-600">
-							{employee.fullName}
-						</span>
-						{isDemoUser && (
-							<button
-								onClick={endDemo}
-								className="px-4 py-2 rounded-full border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
-							>
-								Exit demo
-							</button>
-						)}
-						<Link
-							to="/"
-							className="px-4 py-2 rounded-full bg-primary text-white text-sm hover:bg-primary-dull transition-all"
-						>
-							Back to site
-						</Link>
-					</div>
-				</div>
-			</header>
-
-			<main className="max-w-5xl mx-auto px-4 md:px-8 py-10 md:py-14">
+		<div>
 				<Title
 					align="left"
 					title="My employee portal"
@@ -130,6 +100,10 @@ const EmployeePortal = () => {
 					Limited view · Only your own details and shifts are shown here. Hotel
 					management tools live in a separate area.
 				</p>
+
+				<div className="mt-8">
+					<PendingBookingsWidget role="employee" />
+				</div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
 					<section
@@ -257,7 +231,6 @@ const EmployeePortal = () => {
 						</ul>
 					</section>
 				</div>
-			</main>
 		</div>
 	);
 };

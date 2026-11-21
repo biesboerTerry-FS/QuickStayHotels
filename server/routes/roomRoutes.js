@@ -1,8 +1,11 @@
 import express from "express";
 import Room from "../models/Room.js";
+import { protect, requireRole } from "../middleware/auth.js";
+import { validateRoom, validateRoomPatch } from "../middleware/validate.js";
 
 const router = express.Router();
 
+// Public browse: room listing and room detail stay open.
 router.get("/", async (request, response) => {
 	try {
 		const rooms = await Room.find().sort({ createdAt: -1 });
@@ -24,7 +27,8 @@ router.get("/:id", async (request, response) => {
 	}
 });
 
-router.post("/", async (request, response) => {
+// Catalog mutations are owner/admin only.
+router.post("/", protect, requireRole("owner", "admin"), validateRoom, async (request, response) => {
 	try {
 		const room = new Room(request.body);
 		await room.save();
@@ -34,7 +38,7 @@ router.post("/", async (request, response) => {
 	}
 });
 
-router.patch("/:id", async (request, response) => {
+router.patch("/:id", protect, requireRole("owner", "admin"), validateRoomPatch, async (request, response) => {
 	try {
 		const room = await Room.findByIdAndUpdate(request.params.id, request.body, {
 			new: true,
@@ -49,7 +53,7 @@ router.patch("/:id", async (request, response) => {
 	}
 });
 
-router.delete("/:id", async (request, response) => {
+router.delete("/:id", protect, requireRole("owner", "admin"), async (request, response) => {
 	try {
 		const room = await Room.findByIdAndDelete(request.params.id);
 		if (!room) {

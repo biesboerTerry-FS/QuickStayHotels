@@ -6,6 +6,7 @@ import { bookingStatus } from "../../lib/bookings";
 import { formatCurrency, formatDay, toDay } from "../../lib/format";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import LatestBulletinWidget from "../../components/hotelOwner/LatestBulletinWidget";
+import PendingBookingsWidget from "../../components/portal/PendingBookingsWidget";
 
 const StatCard = ({ label, value, hint, icon }) => (
 	<div className="bg-white border border-gray-200 rounded-xl p-5 flex items-start gap-4 shadow-sm">
@@ -105,6 +106,7 @@ const Dashboard = () => {
 
 			<div className="mt-6">
 				<LatestBulletinWidget />
+				<PendingBookingsWidget role="owner" />
 			</div>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 my-8">

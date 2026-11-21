@@ -3,6 +3,7 @@ import { getState, setState } from "../data/store";
 import { createBooking } from "../lib/bookings";
 import { toDay } from "../lib/format";
 import { catalogRooms } from "../data/catalog";
+import { endApiSession } from "../lib/api";
 
 const DEMO_KEY = "quickstay:demo";
 // Demo sign-in is enabled by default so the "Try demo" / "Try owner demo" buttons
@@ -87,6 +88,7 @@ export const DemoAuthProvider = ({ children }) => {
 	useEffect(() => {
 		const handler = (event) => {
 			if (event.key === DEMO_KEY) {
+				endApiSession();
 				setMode(loadDemoMode());
 			}
 		};
@@ -96,6 +98,7 @@ export const DemoAuthProvider = ({ children }) => {
 
 	const startDemo = useCallback((selectedMode = "guest") => {
 		if (!DEMO_ENABLED) return;
+		endApiSession();
 		const next = { mode: selectedMode, startedAt: new Date().toISOString() };
 		localStorage.setItem(DEMO_KEY, JSON.stringify(next));
 		setMode(next);
@@ -106,6 +109,7 @@ export const DemoAuthProvider = ({ children }) => {
 
 	const endDemo = useCallback(() => {
 		localStorage.removeItem(DEMO_KEY);
+		endApiSession();
 		setMode(null);
 	}, []);
 

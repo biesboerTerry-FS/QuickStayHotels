@@ -3,8 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useBookings } from "../data/store";
 import { formatCurrency } from "../lib/format";
 import useDocumentTitle from "../hooks/useDocumentTitle";
-
-const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+import { apiFetch } from "../lib/api";
 
 const PaymentPage = () => {
 	const { bookingId } = useParams();
@@ -45,7 +44,7 @@ const PaymentPage = () => {
 		setSubmitting(true);
 		setError("");
 		try {
-			const response = await fetch(`${apiBase}/api/create-checkout-session`, {
+			const response = await apiFetch("/api/create-checkout-session", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({

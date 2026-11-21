@@ -5,13 +5,28 @@ import { useToast } from "../../context/ToastContext";
 import { bookingStatus, bookingsToCsv, nightsBetween } from "../../lib/bookings";
 import { downloadFile } from "../../lib/download";
 import { formatCurrency, formatDay, todayIso } from "../../lib/format";
+import {
+	advanceBooking,
+	getFulfillmentStatus,
+	nextFulfillmentStatus,
+	useFulfillment,
+} from "../../lib/orders";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const filters = ["All", "Paid", "Pending", "Cancelled"];
 
+const fulfillmentClass = {
+	pending: "bg-amber-100 text-amber-700",
+	confirmed: "bg-blue-100 text-blue-700",
+	"checked-in": "bg-purple-100 text-purple-700",
+	completed: "bg-green-100 text-green-700",
+	cancelled: "bg-gray-100 text-gray-500",
+};
+
 const Bookings = () => {
 	useDocumentTitle("Bookings");
 	const bookings = useBookings();
+	useFulfillment();
 	const toast = useToast();
 	const [filter, setFilter] = useState("All");
 	const [query, setQuery] = useState("");
@@ -114,14 +129,17 @@ const Bookings = () => {
 							<th scope="col" className="py-3 px-4 font-medium">Payment method</th>
 							<th scope="col" className="py-3 px-4 font-medium text-right">Total</th>
 							<th scope="col" className="py-3 px-4 font-medium text-center">Status</th>
+							<th scope="col" className="py-3 px-4 font-medium text-center">Fulfillment</th>
 							<th scope="col" className="py-3 px-4 font-medium text-center">Action</th>
 						</tr>
 					</thead>
 					<tbody className="text-gray-700">
 						{visible.map((booking, index) => {
 							const status = bookingStatus(booking);
+							const fulfillment = getFulfillmentStatus(booking);
+							const next = nextFulfillmentStatus(booking);
 							return (
-								<tr key={`${booking._id}-${index}`} className="border-t border-gray-200">
+								<tr key={`${booking._id}-${index}`} data-testid="order-row" className="border-t border-gray-200">
 									<td className="py-3 px-4 font-mono text-xs text-gray-500">
 										{booking._id.slice(-6).toUpperCase()}
 									</td>
@@ -157,6 +175,27 @@ const Bookings = () => {
 										</span>
 									</td>
 									<td className="py-3 px-4 text-center">
+										<span
+											data-testid="order-status"
+											className={`inline-block px-3 py-1 text-xs rounded-full capitalize ${fulfillmentClass[fulfillment]}`}
+										>
+											{fulfillment}
+										</span>
+										{next && (
+											<button
+												type="button"
+												data-testid="advance-order"
+												onClick={() => {
+													advanceBooking(booking);
+													toast.show(`Order moved to ${next}`);
+												}}
+												className="block mx-auto mt-2 px-3 py-1 text-xs rounded-full border border-gray-300 hover:bg-gray-50 cursor-pointer"
+											>
+												Advance → {next}
+											</button>
+										)}
+									</td>
+									<td className="py-3 px-4 text-center">
 										{status === "Pending" && (
 											<button
 												onClick={() => markPaid(booking)}
@@ -171,7 +210,7 @@ const Bookings = () => {
 						})}
 						{visible.length === 0 && (
 							<tr>
-								<td colSpan={9} className="py-10 text-center text-gray-500 border-t border-gray-200">
+								<td colSpan={10} className="py-10 text-center text-gray-500 border-t border-gray-200">
 									No bookings match your filters.
 								</td>
 							</tr>

@@ -1,6 +1,7 @@
 import express from "express";
 import Employee from "../models/Employee.js";
 import { DEMO_EMPLOYEES, seedDemoEmployees } from "../utils/seedEmployees.js";
+import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -59,8 +60,24 @@ router.get("/me", async (request, response) => {
 	}
 });
 
-router.patch("/me", async (request, response) => {
-	const id = resolveId(request);
+// GET /me stays public for the demo portal. PATCH /me is a state change and
+// requires a token; the record is always scoped to the authenticated employee
+// so a client cannot edit somebody else's profile via x-employee-id.
+router.patch("/me", protect, async (request, response) => {
+	const id =
+		request.auth.role === "employee"
+			? request.auth.employeeId || request.auth.id
+			: request.auth.id;
+	if (
+		request.auth.role === "employee" &&
+		resolveId(request) !== id &&
+		(request.header("x-employee-id") || request.query.id)
+	) {
+		return response.status(403).json({
+			success: false,
+			message: "You can only edit your own employee profile",
+		});
+	}
 	const patch = cleanPatch(request.body);
 	if (Object.keys(patch).length === 0) {
 		return response.status(400).json({

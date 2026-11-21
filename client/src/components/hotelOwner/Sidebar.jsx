@@ -10,7 +10,7 @@ const Sidebar = () => {
 				{ name: "Dashboard", path: "/owner", icon: assets.dashboardIcon },
 				{ name: "Add Room", path: "/owner/add-room", icon: assets.addIcon },
 				{ name: "List Rooms", path: "/owner/list-rooms", icon: assets.listIcon },
-				{ name: "Bookings", path: "/owner/bookings", icon: assets.calenderIcon },
+				{ name: "Orders", path: "/owner/orders", icon: assets.calenderIcon },
 				{ name: "Offers", path: "/owner/offers", icon: assets.badgeIcon },
 				{ name: "Hotel Profile", path: "/owner/profile", icon: assets.homeIcon },
 			],
@@ -19,9 +19,19 @@ const Sidebar = () => {
 			name: "Communication",
 			links: [
 				{
+					name: "Messages",
+					path: "/owner/messages",
+					icon: assets.announcementIcon,
+				},
+				{
+					name: "Schedule",
+					path: "/owner/schedule",
+					icon: assets.calenderIcon,
+				},
+				{
 					name: "Announcements",
 					path: "/owner/announcements",
-					icon: assets.announcementIcon,
+					icon: assets.listIcon,
 				},
 			],
 		},
