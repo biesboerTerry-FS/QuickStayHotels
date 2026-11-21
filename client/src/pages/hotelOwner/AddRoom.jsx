@@ -158,34 +158,22 @@ const AddRoom = () => {
 
 				<div>
 					<label className="text-sm font-medium text-gray-800">Photos</label>
-					<div className="flex flex-wrap gap-3 mt-3">
-						{form.images.map((url, index) => (
-							<div key={index} className="relative">
-								<img
-									src={url}
-									alt={`Uploaded ${index + 1}`}
-									className="w-24 h-24 object-cover rounded-lg border border-gray-200"
-								/>
-								<button
-									type="button"
-									onClick={() =>
-										setForm((prev) => ({
-											...prev,
-											images: prev.images.filter((_, i) => i !== index),
-										}))
-									}
-									className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs"
-								>
-									×
-								</button>
-							</div>
-						))}
+					<div className="mt-3">
 						<ImageUpload
+							value={form.images}
+							maxFiles={8}
 							onUpload={(url) =>
 								setForm((prev) => ({ ...prev, images: [...prev.images, url] }))
 							}
+							onRemove={(url) =>
+								setForm((prev) => ({
+									...prev,
+									images: prev.images.filter((image) => image !== url),
+								}))
+							}
 						/>
 					</div>
+					<p className="text-xs text-gray-500 mt-2">Attach up to 8 photos. Use the × on a photo to remove it.</p>
 				</div>
 			</div>
 
