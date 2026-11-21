@@ -17,6 +17,7 @@ import {
 	useSchedule,
 } from "../../lib/schedule";
 import { formatDay, todayIso } from "../../lib/format";
+import { decideTimeOff } from "../../lib/hr";
 
 const statusClass = {
 	pending: "bg-amber-100 text-amber-700",
@@ -129,8 +130,12 @@ const Schedule = ({ role = "employee" }) => {
 	const shiftRequests = requests.filter((r) => r.kind !== "block" && (isOwner || r.employeeId === employeeId) && r.type === "shift");
 	const timeOffRequests = requests.filter((r) => r.kind !== "block" && (isOwner || r.employeeId === employeeId) && r.type === "time-off");
 
-	const decide = (id, decision) => {
+	const decide = async (id, decision) => {
+		const request = requests.find((item) => item.id === id);
 		updateRequestStatus(id, decision);
+		// Mirror to the protected HR API as well, so the decision survives a
+		// browser reset even when it was made from the Schedule page.
+		if (isOwner && request) await decideTimeOff(request, decision);
 		toast.show(`Request ${decision}`);
 	};
 
