@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { apiFetch } from "./api";
 import { HR_SEED } from "../data/hrSeed";
 import { updateRequestStatus } from "./schedule";
+import { mergeEmployeesFromServer } from "./employees";
 
 // Owner-only HR data. localStorage is the demo source of truth (the same
 // pattern as bulletins and bookings); every change is also sent to the JWT
@@ -105,6 +106,7 @@ export const useHrRefresh = () => {
 export const refreshFromServer = async () => {
 	const data = await hrRequest("/api/hr/state");
 	if (!data?.success) return false;
+	mergeEmployeesFromServer(data.employees);
 	update((current) => ({
 		...current,
 		departments: mergeById(current.departments, data.departments),

@@ -275,6 +275,21 @@ export const getEmployees = load;
 export const useEmployees = () =>
 	useSyncExternalStore(subscribe, load, cloneSeeds);
 
+// Bring in employees created through the HR API from another browser/session.
+// Existing local records (and their edits) always win.
+export const mergeEmployeesFromServer = (remote = []) => {
+	if (!Array.isArray(remote) || remote.length === 0) return;
+	const current = load();
+	const known = new Set(current.map((employee) => employee.id));
+	const additions = remote
+		.filter((employee) => employee?.id && !known.has(employee.id))
+		.map(normalize);
+	if (additions.length === 0) return;
+	cache = [...current, ...additions];
+	writeStorage(cache);
+	notify();
+};
+
 export const getEmployee = (id) => load().find((employee) => employee.id === id) || null;
 
 export const updateEmployee = (id, patch) => {
