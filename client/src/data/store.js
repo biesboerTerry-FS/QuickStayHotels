@@ -45,6 +45,9 @@ const defaults = {
 	searches: [],
 	newsletter: [],
 	profile: hotelProfileDefaults,
+	// Customer profiles are keyed by Clerk / demo user id. They only hold plain
+	// contact details, addresses, and masked metadata for demo cards.
+	customerProfiles: {},
 	offers: seedOffers,
 };
 

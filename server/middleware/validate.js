@@ -341,6 +341,57 @@ export const validatePayRun = validateFields(payRunSchema);
 export const validateTimeOffDecision = validateFields(timeOffDecisionSchema);
 export const validatePerformanceNote = validateFields(performanceNoteSchema);
 
+// ---------------------------------------------------------------------------
+// Customer profile, addresses and masked demo payment methods. Every schema
+// rejects unknown fields so extra data (especially card numbers) can never be
+// forwarded to a model.
+// ---------------------------------------------------------------------------
+const customerProfileSchema = {
+	fullName: required(stringField(120)),
+	email: emailField,
+	phone: optionalStringField(60),
+};
+
+export const validateCustomerProfile = validateFields(customerProfileSchema, {
+	partial: true,
+});
+
+const addressSchema = {
+	label: optionalStringField(60),
+	line1: required(stringField(200)),
+	line2: optionalStringField(200),
+	city: required(stringField(100)),
+	state: optionalStringField(100),
+	zip: optionalStringField(20),
+	country: required(stringField(100)),
+	isDefault: boolField,
+};
+
+export const validateAddress = validateFields(addressSchema);
+export const validateAddressPatch = validateFields(addressSchema, { partial: true });
+
+const fourDigitsField = (value) => {
+	const error = stringField(4)(value);
+	if (error) return error;
+	if (!/^\d{4}$/.test(value)) return "must be exactly four digits";
+	return null;
+};
+
+const paymentMethodSchema = {
+	brand: optionalStringField(40),
+	label: optionalStringField(60),
+	// Only masked metadata is accepted. A full card number is an unknown field
+	// and is rejected by validateFields before it reaches any model.
+	last4: required(fourDigitsField),
+	exp: optionalStringField(5),
+	isDefault: boolField,
+};
+
+export const validatePaymentMethod = validateFields(paymentMethodSchema);
+export const validatePaymentMethodPatch = validateFields(paymentMethodSchema, {
+	partial: true,
+});
+
 export const rejectMalformedBody = (request, response, next) => {
 	const body = request.body;
 	if (!isPlainObject(body) || Object.keys(body).length === 0) {

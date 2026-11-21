@@ -35,13 +35,26 @@ export const endApiSession = () => {
 };
 
 let pendingToken = null;
+let clerkTokenProvider = null;
 
-export const getApiToken = () => {
-	const cached = readToken();
-	if (cached) return Promise.resolve(cached);
-	if (pendingToken) return pendingToken;
+// Set by the app when a Clerk user is signed in. The provider returns a Clerk
+// session token that is exchanged for a QuickStay JWT; demo users keep using
+// the fixed demo login below.
+export const setApiClerkTokenProvider = (provider) => {
+	clerkTokenProvider = provider;
+};
 
-	pendingToken = fetch(`${API_BASE}/api/auth/demo`, {
+const storeToken = (token) => {
+	try {
+		sessionStorage.setItem(TOKEN_KEY, token);
+	} catch {
+		// session storage unavailable; token is used for this request only
+	}
+	return token;
+};
+
+const requestDemoToken = () =>
+	fetch(`${API_BASE}/api/auth/demo`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ role: demoRole() }),
@@ -50,16 +63,43 @@ export const getApiToken = () => {
 			if (!response.ok) throw new Error("Could not start secure session");
 			const data = await response.json();
 			if (!data?.token) throw new Error("No session token returned");
-			try {
-				sessionStorage.setItem(TOKEN_KEY, data.token);
-			} catch {
-				// session storage unavailable; token is used for this request only
-			}
-			return data.token;
-		})
-		.finally(() => {
-			pendingToken = null;
+			return storeToken(data.token);
 		});
+
+const requestClerkToken = async () => {
+	if (!clerkTokenProvider) return null;
+	const clerkToken = await clerkTokenProvider();
+	if (!clerkToken) return null;
+	const response = await fetch(`${API_BASE}/api/auth/clerk`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${clerkToken}`,
+		},
+		body: "{}",
+	});
+	if (!response.ok) throw new Error("Could not start secure Clerk session");
+	const data = await response.json();
+	if (!data?.token) throw new Error("No session token returned");
+	return storeToken(data.token);
+};
+
+export const getApiToken = () => {
+	const cached = readToken();
+	if (cached) return Promise.resolve(cached);
+	if (pendingToken) return pendingToken;
+
+	pendingToken = (async () => {
+		try {
+			const clerkToken = await requestClerkToken();
+			if (clerkToken) return clerkToken;
+		} catch {
+			// Fall back to the demo login when a Clerk exchange is unavailable.
+		}
+		return requestDemoToken();
+	})().finally(() => {
+		pendingToken = null;
+	});
 
 	return pendingToken;
 };

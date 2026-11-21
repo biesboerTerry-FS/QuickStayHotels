@@ -45,6 +45,16 @@ const DEMO_IDENTITIES = {
 
 const normalizeRole = (role) => (role === "hotelOwner" ? "owner" : role);
 
+// Clerk sessions are exchanged for a short-lived QuickStay JWT so signed-in
+// customers can use the same protected profile/address API as demo users.
+const clerkExchangeLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	limit: 60,
+	standardHeaders: "draft-7",
+	legacyHeaders: false,
+	message: { success: false, message: "Too many session requests, please try again later." },
+});
+
 // POST /api/auth/demo — issues a short-lived, demo-scoped access token.
 // Identities are fixed in code; callers cannot choose their own user id/role
 // beyond the documented demo roles.
@@ -84,6 +94,43 @@ router.post("/demo", demoLoginLimiter, validateDemoLogin, (request, response) =>
 		return response.status(500).json({
 			success: false,
 			message: "Could not start demo session",
+		});
+	}
+});
+
+// POST /api/auth/clerk — exchange a Clerk session token (verified by
+// clerkMiddleware) for a QuickStay access token scoped to that Clerk user id.
+router.post("/clerk", clerkExchangeLimiter, (request, response) => {
+	const clerkAuth = request.auth;
+	const userId = clerkAuth?.userId;
+	if (!userId) {
+		return response.status(401).json({
+			success: false,
+			message: "A valid Clerk session is required",
+		});
+	}
+
+	try {
+		const claims = clerkAuth.sessionClaims || {};
+		const role = normalizeRole(claims.role || claims.metadata?.role || "user");
+		const token = signAccessToken({
+			sub: userId,
+			role,
+			name: claims.name || [claims.given_name, claims.family_name].filter(Boolean).join(" ") || "Guest",
+			email: claims.email || "",
+		});
+		return response.json({
+			success: true,
+			token,
+			tokenType: "Bearer",
+			expiresIn: process.env.JWT_EXPIRES_IN || "12h",
+			user: { id: userId, role, name: claims.name || "Guest", email: claims.email || "" },
+		});
+	} catch (error) {
+		console.error("Clerk session exchange failed:", error.message);
+		return response.status(500).json({
+			success: false,
+			message: "Could not start secure session",
 		});
 	}
 });

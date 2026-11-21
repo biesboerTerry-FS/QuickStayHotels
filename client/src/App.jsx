@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import { useAuth } from "@clerk/react";
+import { endApiSession, setApiClerkTokenProvider } from "./lib/api";
 import Navbar from "./components/Navbar";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
@@ -8,6 +10,7 @@ import AllRooms from "./pages/AllRooms";
 import RoomDetails from "./pages/RoomDetails";
 import MyBookings from "./pages/MyBookings";
 import SavedRooms from "./pages/SavedRooms";
+import CustomerProfile from "./pages/CustomerProfile";
 import BookingPage from "./pages/BookingPage";
 import BookingConfirmed from "./pages/BookingConfirmed";
 import PaymentPage from "./pages/PaymentPage";
@@ -55,6 +58,31 @@ const App = () => {
 	const isEmployeePath = pathname.startsWith("/employee");
 	const isPortalPath = isOwnerPath || isEmployeePath;
 
+	// Signed-in Clerk users get their own JWT for the protected customer API;
+	// demo users continue to use the fixed demo login in api.js. Only clear a
+	// cached token when the identity actually changes — a page reload must keep
+	// it, otherwise every reload would burn a demo-login rate-limit slot.
+	const { isLoaded: authLoaded, userId, getToken } = useAuth();
+	const getTokenRef = useRef(getToken);
+	const previousUserId = useRef(undefined);
+	useEffect(() => {
+		getTokenRef.current = getToken;
+	}, [getToken]);
+	useEffect(() => {
+		setApiClerkTokenProvider(
+			authLoaded && userId ? () => getTokenRef.current() : null
+		);
+		// `undefined` means the first render; only a real sign-in/sign-out
+		// transition invalidates the cached demo/Clerk token.
+		if (
+			previousUserId.current !== undefined &&
+			previousUserId.current !== userId
+		) {
+			endApiSession();
+		}
+		previousUserId.current = userId;
+	}, [authLoaded, userId]);
+
 	return (
 		<div>
 			<ScrollToTop />
@@ -79,6 +107,7 @@ const App = () => {
 					<Route path="/pay/success" element={<PaymentSuccess />} />
 					<Route path="/my-bookings" element={<MyBookings />} />
 					<Route path="/saved" element={<SavedRooms />} />
+					<Route path="/profile" element={<CustomerProfile />} />
 					<Route path="/offers" element={<Offers />} />
 					<Route path="/offers/:slug" element={<OfferDetails />} />
 					<Route

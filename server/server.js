@@ -17,6 +17,9 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import hrRoutes from "./routes/hrRoutes.js";
 import portalRoutes from "./routes/portalRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import addressRoutes from "./routes/addressRoutes.js";
+import paymentMethodRoutes from "./routes/paymentMethodRoutes.js";
 import { initSentry } from "./utils/sentry.js";
 import Stripe from "stripe";
 
@@ -130,6 +133,11 @@ app.use("/api/employee", employeeRoutes);
 // roles; public room browse and the employee self-service portal are untouched.
 app.use("/api/hr", hrRoutes);
 app.use("/api/portal", portalRoutes);
+// Customer self-service: profile, addresses and masked demo payment methods.
+// Each router is JWT protected and scopes records to request.auth.id.
+app.use("/api/user", userRoutes);
+app.use("/api/address", addressRoutes);
+app.use("/api/payment-methods", paymentMethodRoutes);
 
 app.get("/", (request, response) => response.send("API is working, yo"));
 app.get("/health", (request, response) =>
