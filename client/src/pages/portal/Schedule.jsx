@@ -1,13 +1,18 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Title from "../../components/Title";
+import Icon from "../../components/Icons";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useToast } from "../../context/ToastContext";
 import { useDemoUser } from "../../context/DemoAuthContext";
 import { DEMO_EMPLOYEE_ID, SEED_EMPLOYEES, useEmployee } from "../../lib/employees";
 import {
+	addAvailabilityBlock,
+	getBlocks,
 	isAvailable,
+	removeAvailabilityBlock,
 	setAvailability,
 	submitRequest,
+	syncBlocksFromServer,
 	updateRequestStatus,
 	useSchedule,
 } from "../../lib/schedule";
@@ -25,20 +30,32 @@ const tomorrow = () => {
 	return date.toISOString().slice(0, 10);
 };
 
+const timeRange = (item) =>
+	item.kind === "block" && item.startTime && item.endTime
+		? `${item.startTime} – ${item.endTime} · unavailable`
+		: item.type === "time-off"
+			? "Full day"
+			: "Shift change";
+
 const RequestRow = ({ request, showEmployee, onDecision }) => (
 	<li
-		data-testid={request.type === "time-off" ? "timeoff-request-item" : "schedule-request-item"}
+		data-testid={request.kind === "block" ? "timeoff-block-row" : request.type === "time-off" ? "timeoff-request-item" : "schedule-request-item"}
 		className="rounded-xl border border-gray-200 p-4"
 	>
 		<div className="flex flex-wrap items-start justify-between gap-3">
 			<div>
 				<p className="text-sm font-medium text-gray-800">
-					{request.type === "time-off" ? "Time off" : "Shift change"} · {request.date}
+					{request.kind === "block" ? "Time off · " : request.type === "time-off" ? "Time off · " : "Shift change · "}
+					{request.date}
 					{request.endDate && request.endDate !== request.date ? ` → ${request.endDate}` : ""}
 				</p>
 				{showEmployee && (
 					<p className="text-xs text-gray-500 mt-1">{request.employeeName}</p>
 				)}
+				<p className="text-xs text-primary mt-1 flex items-center gap-1.5">
+					<Icon name="clock" className="h-4 w-4" />
+					{timeRange(request)}
+				</p>
 				<p className="text-sm text-gray-600 mt-2">{request.reason || "No reason provided."}</p>
 			</div>
 			<div className="flex flex-col items-end gap-2">
@@ -78,6 +95,18 @@ const Schedule = ({ role = "employee" }) => {
 	const isOwner = role === "owner";
 
 	const [form, setForm] = useState({ type: "shift", date: tomorrow(), endDate: "", reason: "" });
+	const [blockForm, setBlockForm] = useState({
+		date: tomorrow(),
+		startTime: "12:00",
+		endTime: "16:00",
+		reason: "",
+	});
+
+	// Bring in blocks stored by the API (another browser/session) without
+	// overwriting anything this browser already decided.
+	useEffect(() => {
+		syncBlocksFromServer(isOwner ? "all" : "self");
+	}, [isOwner]);
 
 	const assignments = useMemo(() => {
 		const source = isOwner ? SEED_EMPLOYEES : employee ? [employee] : [];
@@ -93,8 +122,12 @@ const Schedule = ({ role = "employee" }) => {
 	}, [isOwner, employee]);
 
 	const requests = state.requests;
-	const shiftRequests = isOwner ? requests.filter((r) => r.type === "shift") : requests.filter((r) => r.employeeId === employeeId && r.type === "shift");
-	const timeOffRequests = isOwner ? requests.filter((r) => r.type === "time-off") : requests.filter((r) => r.employeeId === employeeId && r.type === "time-off");
+	const blocks = useMemo(
+		() => getBlocks(isOwner ? undefined : employeeId, requests),
+		[isOwner, employeeId, requests]
+	);
+	const shiftRequests = requests.filter((r) => r.kind !== "block" && (isOwner || r.employeeId === employeeId) && r.type === "shift");
+	const timeOffRequests = requests.filter((r) => r.kind !== "block" && (isOwner || r.employeeId === employeeId) && r.type === "time-off");
 
 	const decide = (id, decision) => {
 		updateRequestStatus(id, decision);
@@ -117,6 +150,34 @@ const Schedule = ({ role = "employee" }) => {
 		});
 		setForm({ type: "shift", date: tomorrow(), endDate: "", reason: "" });
 		toast.show("Your request was submitted");
+	};
+
+	const addBlock = async (event) => {
+		event.preventDefault();
+		if (!blockForm.date || !blockForm.startTime || !blockForm.endTime) {
+			toast.show("Choose a date and both times.", "error");
+			return;
+		}
+		if (blockForm.endTime <= blockForm.startTime) {
+			toast.show("End time must be after start time.", "error");
+			return;
+		}
+		const created = await addAvailabilityBlock({
+			employeeId,
+			employeeName: employee?.fullName || "Demo employee",
+			...blockForm,
+		});
+		if (!created) {
+			toast.show("Could not add that time-off block.", "error");
+			return;
+		}
+		setBlockForm({ date: tomorrow(), startTime: "12:00", endTime: "16:00", reason: "" });
+		toast.show("Unavailable hours saved");
+	};
+
+	const removeBlock = async (id) => {
+		await removeAvailabilityBlock(id);
+		toast.show("Time-off block removed");
 	};
 
 	const toggleAvailability = () => {
@@ -169,22 +230,120 @@ const Schedule = ({ role = "employee" }) => {
 							))}
 						</ul>
 					) : (
-						<div className="mt-4 rounded-lg border border-gray-200 p-4 flex items-center justify-between">
-							<div>
-								<p className="text-sm font-medium text-gray-800">Available for shifts</p>
-								<p className="text-xs text-gray-500 mt-1">Let the team know you can take assignments.</p>
+						<>
+							<div className="mt-4 rounded-lg border border-gray-200 p-4 flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-800">Available for shifts</p>
+									<p className="text-xs text-gray-500 mt-1">Let the team know you can take assignments.</p>
+								</div>
+								<button
+									type="button"
+									role="switch"
+									aria-checked={isAvailable(employeeId)}
+									data-testid="availability-toggle"
+									onClick={toggleAvailability}
+									className={`relative h-7 w-12 rounded-full transition-colors cursor-pointer ${isAvailable(employeeId) ? "bg-primary" : "bg-gray-300"}`}
+								>
+									<span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${isAvailable(employeeId) ? "left-6" : "left-1"}`} />
+								</button>
 							</div>
-							<button
-								type="button"
-								role="switch"
-								aria-checked={isAvailable(employeeId)}
-								data-testid="availability-toggle"
-								onClick={toggleAvailability}
-								className={`relative h-7 w-12 rounded-full transition-colors cursor-pointer ${isAvailable(employeeId) ? "bg-primary" : "bg-gray-300"}`}
-							>
-								<span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${isAvailable(employeeId) ? "left-6" : "left-1"}`} />
-							</button>
-						</div>
+
+							<div className="mt-6" data-testid="employee-timeoff-blocks">
+								<h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+									<Icon name="clock" className="h-4 w-4 text-primary" />
+									Mark time off
+								</h3>
+								<p className="text-xs text-gray-500 mt-1">
+									Add an exact date and time range when you are unavailable. Management reviews each block.
+								</p>
+								<form data-testid="timeoff-block-form" onSubmit={addBlock} className="mt-4 grid gap-3 sm:grid-cols-2">
+									<div>
+										<label htmlFor="block-date" className="block text-xs font-medium text-gray-700">Date</label>
+										<input
+											id="block-date"
+											data-testid="timeoff-date"
+											type="date"
+											value={blockForm.date}
+											onChange={(e) => setBlockForm({ ...blockForm, date: e.target.value })}
+											className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+										/>
+									</div>
+									<div className="grid grid-cols-2 gap-3">
+										<div>
+											<label htmlFor="block-start" className="block text-xs font-medium text-gray-700">From</label>
+											<input
+												id="block-start"
+												data-testid="timeoff-start"
+												type="time"
+												value={blockForm.startTime}
+												onChange={(e) => setBlockForm({ ...blockForm, startTime: e.target.value })}
+												className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+											/>
+										</div>
+										<div>
+											<label htmlFor="block-end" className="block text-xs font-medium text-gray-700">To</label>
+											<input
+												id="block-end"
+												data-testid="timeoff-end"
+												type="time"
+												value={blockForm.endTime}
+												onChange={(e) => setBlockForm({ ...blockForm, endTime: e.target.value })}
+												className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+											/>
+										</div>
+									</div>
+									<div className="sm:col-span-2">
+										<label htmlFor="block-reason" className="block text-xs font-medium text-gray-700">Reason (optional)</label>
+										<input
+											id="block-reason"
+											data-testid="timeoff-reason"
+											value={blockForm.reason}
+											onChange={(e) => setBlockForm({ ...blockForm, reason: e.target.value })}
+											placeholder="e.g. Appointment, school pickup"
+											className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+										/>
+									</div>
+									<div className="flex items-end sm:col-span-2">
+										<button
+											type="submit"
+											data-testid="timeoff-block-submit"
+											className="rounded-lg bg-primary px-5 py-2 text-sm text-white hover:bg-primary-dull cursor-pointer"
+										>
+											Add unavailable hours
+										</button>
+									</div>
+								</form>
+
+								<ul className="mt-5 space-y-2" data-testid="timeoff-block-list">
+									{blocks.map((block) => (
+										<li key={block.id} data-testid="timeoff-block" className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 p-3">
+											<div>
+												<p className="text-sm text-gray-800">
+													{block.date} · {block.startTime}–{block.endTime}
+												</p>
+												<p className="text-xs text-gray-500 mt-1">{block.reason || "No reason provided."}</p>
+											</div>
+											<div className="flex items-center gap-2">
+												<span className={`rounded-full px-2.5 py-1 text-xs ${statusClass[block.status] || statusClass.pending}`}>
+													{block.status}
+												</span>
+												<button
+													type="button"
+													data-testid="timeoff-block-remove"
+													onClick={() => removeBlock(block.id)}
+													className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 hover:bg-gray-50 cursor-pointer"
+												>
+													Remove
+												</button>
+											</div>
+										</li>
+									))}
+									{blocks.length === 0 && (
+										<li className="text-sm text-gray-500">No unavailable hours marked yet.</li>
+									)}
+								</ul>
+							</div>
+						</>
 					)}
 				</section>
 
@@ -268,6 +427,19 @@ const Schedule = ({ role = "employee" }) => {
 						{timeOffRequests.length === 0 && <li className="text-sm text-gray-500">No time off requests.</li>}
 					</ul>
 				</section>
+
+				{isOwner && (
+					<section aria-label="Unavailable blocks" data-testid="owner-timeoff-blocks" className="rounded-xl border border-gray-200 bg-white p-5 lg:col-span-2">
+						<h2 className="text-lg font-semibold text-gray-800">Unavailable blocks</h2>
+						<p className="text-xs text-gray-500 mt-1">Partial-day time off marked by employees. Approve or deny it here.</p>
+						<ul className="mt-4 space-y-3">
+							{blocks.map((block) => (
+								<RequestRow key={block.id} request={block} showEmployee onDecision={decide} />
+							))}
+							{blocks.length === 0 && <li className="text-sm text-gray-500">No unavailable blocks yet.</li>}
+						</ul>
+					</section>
+				)}
 			</div>
 		</div>
 	);

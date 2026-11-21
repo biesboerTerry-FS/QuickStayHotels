@@ -9,12 +9,12 @@ const Navbar = () => {
 	const { openSignIn, signOut } = useClerk();
 
 	return (
-		<div className="flex items-center justify-between px-4 md:px-8 border-b border-gray-300 py-3 bg-white transition-all duration-300">
+		<header className="sticky top-0 z-50 flex h-[60px] shrink-0 items-center justify-between border-b border-gray-300 bg-white px-4 transition-all duration-300 md:px-8">
 			<Link to={"/"}>
 				<img
 					src={assets.logo}
 					alt="logo"
-					className="h-9 invert opacity-80"
+					className="h-9 w-auto invert opacity-80"
 				/>
 			</Link>
 
@@ -49,7 +49,7 @@ const Navbar = () => {
 						</button>
 					))}
 			</div>
-		</div>
+		</header>
 	);
 };
 

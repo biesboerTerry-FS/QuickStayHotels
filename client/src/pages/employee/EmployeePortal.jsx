@@ -10,7 +10,9 @@ import {
 	updateEmployee,
 	useEmployee,
 } from "../../lib/employees";
-import { formatDay } from "../../lib/format";
+import { formatDay, todayIso } from "../../lib/format";
+import { getBlocks, useSchedule } from "../../lib/schedule";
+import Icon from "../../components/Icons";
 import PendingBookingsWidget from "../../components/portal/PendingBookingsWidget";
 
 const pickEditable = (employee) => ({
@@ -40,6 +42,7 @@ const EmployeePortal = () => {
 	const { demoUser } = useDemoUser();
 	const employeeId = demoUser?.employeeId || DEMO_EMPLOYEE_ID;
 	const employee = useEmployee(employeeId);
+	const schedule = useSchedule();
 	const [editing, setEditing] = useState(false);
 	const [form, setForm] = useState(() => pickEditable(employee));
 
@@ -87,6 +90,10 @@ const EmployeePortal = () => {
 	const assignments = [...employee.assignments].sort(
 		(a, b) => new Date(a.date) - new Date(b.date)
 	);
+
+	const timeOffBlocks = getBlocks(employeeId, schedule.requests)
+		.filter((block) => block.date >= todayIso())
+		.sort((a, b) => a.date.localeCompare(b.date));
 
 	return (
 		<div>
@@ -227,6 +234,47 @@ const EmployeePortal = () => {
 								<li className="text-sm text-gray-500 py-4">
 									No upcoming assignments.
 								</li>
+							)}
+						</ul>
+					</section>
+
+					<section
+						aria-label="My time off"
+						data-testid="employee-timeoff-summary"
+						className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm lg:col-span-2"
+					>
+						<div className="flex flex-wrap items-start justify-between gap-3">
+							<div>
+								<h2 className="font-playfair text-2xl text-gray-800 flex items-center gap-2">
+									<Icon name="clock" className="h-5 w-5 text-primary" />
+									My time off
+								</h2>
+								<p className="text-sm text-gray-500 mt-1">
+									Partial-day hours you have marked as unavailable.
+								</p>
+							</div>
+							<Link
+								to="/employee/schedule"
+								className="text-sm text-primary hover:underline"
+							>
+								Manage in schedule →
+							</Link>
+						</div>
+						<ul className="mt-5 grid gap-3 sm:grid-cols-2" data-testid="employee-timeoff-summary-list">
+							{timeOffBlocks.map((block) => (
+								<li key={block.id} data-testid="employee-timeoff-summary-item" className="rounded-xl border border-gray-200 p-4">
+									<p className="text-sm font-medium text-gray-800">
+										{formatDay(block.date, { weekday: "short", month: "short", day: "numeric" })}
+									</p>
+									<p className="text-xs text-primary mt-1">{block.startTime} – {block.endTime}</p>
+									<p className="text-xs text-gray-500 mt-1">{block.reason || "No reason provided."}</p>
+									<span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-xs capitalize ${block.status === "approved" ? "bg-green-100 text-green-700" : block.status === "denied" ? "bg-gray-100 text-gray-500" : "bg-amber-100 text-amber-700"}`}>
+										{block.status}
+									</span>
+								</li>
+							))}
+							{timeOffBlocks.length === 0 && (
+								<li className="text-sm text-gray-500">No time off marked yet.</li>
 							)}
 						</ul>
 					</section>

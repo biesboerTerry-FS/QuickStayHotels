@@ -83,3 +83,37 @@ export const HR_SEED = {
 // The Schedule portal owns the request records; the HR time-off queue uses
 // this same list so approvals show up on both sides immediately.
 export const TIME_OFF_SEED_REQUESTS = HR_SEED.timeOff.map((item) => ({ ...item }));
+
+// Partial-day unavailability. `kind: "block"` distinguishes these from whole
+// day requests while still flowing through the existing approval queue. These
+// mirror server/utils/timeOffBlocks.js so both portals show the same demo data.
+export const TIME_OFF_BLOCK_SEED = [
+	{
+		id: "block_demo_1",
+		employeeId: "demo_employee_1",
+		employeeName: "Maya Martinez",
+		type: "time-off",
+		kind: "block",
+		date: dateFromToday(5),
+		endDate: dateFromToday(5),
+		startTime: "12:00",
+		endTime: "16:00",
+		reason: "School pickup · cover my afternoon desk",
+		status: "pending",
+		createdAt: isoDaysAgo(1),
+	},
+	{
+		id: "block_demo_2",
+		employeeId: "demo_employee_2",
+		employeeName: "Daniel Kim",
+		type: "time-off",
+		kind: "block",
+		date: dateFromToday(7),
+		endDate: dateFromToday(7),
+		startTime: "09:00",
+		endTime: "13:00",
+		reason: "Medical appointment",
+		status: "approved",
+		createdAt: isoDaysAgo(2),
+	},
+];

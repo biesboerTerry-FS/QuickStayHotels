@@ -2,6 +2,7 @@ import express from "express";
 import Employee from "../models/Employee.js";
 import HrState from "../models/HrState.js";
 import { DEMO_EMPLOYEES, HR_SEED, seedDemoEmployees } from "../utils/seedEmployees.js";
+import { listBlocks, setBlockStatus } from "../utils/timeOffBlocks.js";
 import { protect, requireRole } from "../middleware/auth.js";
 import {
 	validateHrEmployee,
@@ -245,6 +246,14 @@ router.post("/payroll", validatePayRun, async (request, response) => {
 	return response.status(201).json({ success: true, persisted, payRun: run });
 });
 
+// Partial-day availability blocks made by employees. Reuses the same
+// owner/admin gate as the rest of the HR suite so the approval queue and the
+// Schedule page always show the same records.
+router.get("/timeoff-blocks", async (_request, response) => {
+	const { blocks, persisted } = await listBlocks();
+	return response.json({ success: true, persisted, blocks });
+});
+
 // Decisions are an upsert so a request created in the browser (Schedule
 // portal) can be approved even if the backend mirror has not seen it yet.
 router.patch("/timeoff/:id", validateTimeOffDecision, async (request, response) => {
@@ -270,6 +279,9 @@ router.patch("/timeoff/:id", validateTimeOffDecision, async (request, response) 
 		? state.timeOff.map((item) => (item.id === id ? decision : item))
 		: [decision, ...state.timeOff];
 	const persisted = await writeState(state);
+	// Keep a partial-day block in sync with the decision above. A missing block
+	// is fine — whole-day requests continue through the existing mirror only.
+	await setBlockStatus(id, request.body.status, decision.decidedBy);
 	return response.json({ success: true, persisted, request: decision });
 });
 

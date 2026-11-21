@@ -3,60 +3,8 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { useClerk, useUser, UserButton } from "@clerk/react";
 import ThemeToggle from "./ThemeToggle";
+import Icon from "./Icons";
 import { useDemoUser } from "../context/DemoAuthContext";
-
-const BookIcon = () => (
-	<svg
-		className="w-4 h-4 text-gray-700"
-		aria-hidden="true"
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		fill="none"
-		viewBox="0 0 24 24"
-	>
-		<path
-			stroke="currentColor"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			strokeWidth="2"
-			d="M5 19V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12M9 3v14m7 0v4"
-		/>
-	</svg>
-);
-
-const ProfileIcon = () => (
-	<svg
-		className="w-4 h-4 text-gray-700"
-		aria-hidden="true"
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		fill="none"
-		viewBox="0 0 24 24"
-		stroke="currentColor"
-		strokeWidth="2"
-	>
-		<circle cx="12" cy="8" r="4" />
-		<path strokeLinecap="round" d="M4 21a8 8 0 0 1 16 0" />
-	</svg>
-);
-
-const HeartIcon = () => (
-	<svg
-		className="w-4 h-4 text-gray-700"
-		aria-hidden="true"
-		width="24"
-		height="24"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		strokeWidth="2"
-		strokeLinejoin="round"
-	>
-		<path d="M12 21s-7-4.35-9.5-8.5C.8 9.6 2.2 5.5 6 5.5c2.2 0 3.5 1.3 4.5 2.7C11.5 6.8 12.8 5.5 15 5.5c3.8 0 5.2 4.1 3.5 7C19 17.15 12 21 12 21z" />
-	</svg>
-);
 
 const navLinks = [
 	{ name: "Home", path: "/" },
@@ -108,17 +56,17 @@ const Navbar = () => {
 			<UserButton.MenuItems>
 				<UserButton.Action
 					label="My profile"
-					labelIcon={<ProfileIcon />}
+					labelIcon={<Icon name="user" className="h-5 w-5 text-gray-700" />}
 					onClick={() => navigate("/profile")}
 				/>
 				<UserButton.Action
 					label="My bookings"
-					labelIcon={<BookIcon />}
+					labelIcon={<Icon name="book" className="h-5 w-5 text-gray-700" />}
 					onClick={() => navigate("/my-bookings")}
 				/>
 				<UserButton.Action
 					label="Saved rooms"
-					labelIcon={<HeartIcon />}
+					labelIcon={<Icon name="heart" className="h-5 w-5 text-gray-700" />}
 					onClick={() => navigate("/saved")}
 				/>
 			</UserButton.MenuItems>
@@ -190,11 +138,7 @@ const Navbar = () => {
 					aria-label="Search hotels"
 					className="cursor-pointer"
 				>
-					<img
-						src={assets.searchIcon}
-						alt="search"
-						className={`${isScrolled ? "invert" : ""} h-7 transition-all duration-500`}
-					/>
+					<Icon name="search" className="h-5 w-5 transition-all duration-500" />
 				</button>
 
 				{user ? (
@@ -263,11 +207,7 @@ const Navbar = () => {
 					aria-expanded={isMenuOpen}
 					className="cursor-pointer"
 				>
-					<img
-						src={assets.menuIcon}
-						alt="open menu"
-						className={`${isScrolled ? "invert" : ""} h-4`}
-					/>
+					<Icon name="menu" className="h-5 w-5" />
 				</button>
 			</div>
 
@@ -282,7 +222,7 @@ const Navbar = () => {
 					onClick={() => setIsMenuOpen(false)}
 					aria-label="Close menu"
 				>
-					<img src={assets.closeIcon} alt="close menu" className="h-6.5" />
+					<Icon name="close" className="h-5 w-5 text-gray-800" />
 				</button>
 
 				{navLinks.map((link) => (

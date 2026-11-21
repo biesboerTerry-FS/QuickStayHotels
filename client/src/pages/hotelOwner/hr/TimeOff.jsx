@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Title from "../../../components/Title";
+import Icon from "../../../components/Icons";
 import HrTabs from "../../../components/hr/HrTabs";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { useToast } from "../../../context/ToastContext";
 import { decideTimeOff, useHrRefresh } from "../../../lib/hr";
-import { useSchedule } from "../../../lib/schedule";
+import { syncBlocksFromServer, useSchedule } from "../../../lib/schedule";
 import { formatDay } from "../../../lib/format";
 
 const statusClass = {
@@ -19,6 +20,10 @@ const TimeOff = () => {
 	const toast = useToast();
 	const schedule = useSchedule();
 	const [filter, setFilter] = useState("pending");
+
+	useEffect(() => {
+		syncBlocksFromServer("all");
+	}, []);
 
 	const requests = useMemo(() => {
 		const list = [...schedule.requests].sort((a, b) =>
@@ -60,7 +65,7 @@ const TimeOff = () => {
 
 			<ul className="mt-5 space-y-4">
 				{requests.map((request) => (
-					<li key={request.id} data-testid="hr-timeoff-request" className="rounded-xl border border-gray-200 bg-white p-5">
+					<li key={request.id} data-testid={request.kind === "block" ? "hr-timeoff-block-row" : "hr-timeoff-request"} className="rounded-xl border border-gray-200 bg-white p-5">
 						<div className="flex flex-wrap items-start justify-between gap-4">
 							<div>
 								<div className="flex flex-wrap items-center gap-2">
@@ -68,6 +73,11 @@ const TimeOff = () => {
 									<span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700 capitalize">
 										{request.type === "time-off" ? "Time off" : "Shift change"}
 									</span>
+									{request.kind === "block" && (
+										<span data-testid="hr-timeoff-block" className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+											Partial day
+										</span>
+									)}
 								</div>
 								<p className="mt-2 text-sm text-gray-600">
 									{formatDay(request.date, { month: "short", day: "numeric", year: "numeric" })}
@@ -75,6 +85,12 @@ const TimeOff = () => {
 										? ` → ${formatDay(request.endDate, { month: "short", day: "numeric", year: "numeric" })}`
 										: ""}
 								</p>
+								{request.kind === "block" && request.startTime && (
+									<p className="mt-1 text-xs text-primary flex items-center gap-1.5">
+										<Icon name="clock" className="h-4 w-4" />
+										{request.startTime} – {request.endTime} unavailable
+									</p>
+								)}
 								<p className="mt-1 text-sm text-gray-500">{request.reason || "No reason provided."}</p>
 							</div>
 							<div className="flex flex-col items-end gap-3">

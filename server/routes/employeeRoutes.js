@@ -1,6 +1,13 @@
 import express from "express";
 import Employee from "../models/Employee.js";
 import { DEMO_EMPLOYEES, seedDemoEmployees } from "../utils/seedEmployees.js";
+import {
+	createBlock,
+	deleteBlock,
+	getBlock,
+	listBlocks,
+	validateBlock,
+} from "../utils/timeOffBlocks.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -117,6 +124,61 @@ router.patch("/me", protect, async (request, response) => {
 			employee: publicEmployee({ ...fallbackEmployee(id), ...patch }),
 		});
 	}
+});
+
+// ---- Partial-day availability blocks (time off) ----
+// GET stays public like /me so the demo portal renders offline; every mutation
+// is JWT protected and scoped to the authenticated employee's own record.
+const scopeEmployeeId = (request) =>
+	request.auth?.role === "employee"
+		? request.auth.employeeId || request.auth.id
+		: request.auth?.id || resolveId(request);
+
+router.get("/timeoff", async (request, response) => {
+	const { blocks, persisted } = await listBlocks(resolveId(request));
+	return response.json({ success: true, persisted, blocks });
+});
+
+router.post("/timeoff", protect, async (request, response) => {
+	const id = scopeEmployeeId(request);
+	const requestedId = String(request.body?.employeeId || id);
+	if (requestedId !== id) {
+		return response.status(403).json({
+			success: false,
+			message: "You can only add time off to your own schedule",
+		});
+	}
+	const error = validateBlock(request.body);
+	if (error) return response.status(400).json({ success: false, message: error });
+
+	const block = {
+		id: `block_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+		employeeId: id,
+		employeeName: String(request.body.employeeName || "").trim().slice(0, 120),
+		date: request.body.date,
+		startTime: request.body.startTime,
+		endTime: request.body.endTime,
+		reason: String(request.body.reason || "").trim().slice(0, 300),
+		status: "pending",
+		createdAt: new Date().toISOString(),
+	};
+	const persisted = await createBlock(block);
+	return response.status(201).json({ success: true, persisted, block });
+});
+
+router.delete("/timeoff/:id", protect, async (request, response) => {
+	const block = await getBlock(request.params.id);
+	if (!block) {
+		return response.status(404).json({ success: false, message: "Block not found" });
+	}
+	if (request.auth.role === "employee" && block.employeeId !== scopeEmployeeId(request)) {
+		return response.status(403).json({
+			success: false,
+			message: "You can only remove your own time off",
+		});
+	}
+	const persisted = await deleteBlock(request.params.id);
+	return response.json({ success: true, persisted });
 });
 
 export default router;
