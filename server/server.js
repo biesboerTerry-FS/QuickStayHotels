@@ -10,6 +10,7 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import seedRoutes from "./routes/seedRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import employeeRoutes from "./routes/employeeRoutes.js";
 import { initSentry } from "./utils/sentry.js";
 import Stripe from "stripe";
 
@@ -95,6 +96,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/seed", seedRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/employee", employeeRoutes);
 
 app.get("/", (request, response) => response.send("API is working, yo"));
 app.get("/health", (request, response) =>

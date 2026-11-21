@@ -31,6 +31,11 @@ const RequireOwner = ({ children }) => {
 		navigate("/owner");
 	};
 
+	const enterEmployeeDemo = () => {
+		startDemo("employee");
+		navigate("/employee");
+	};
+
 	// Dev-only bypass: set VITE_DEV_OWNER_BYPASS=true in .env.local to skip auth
 	const devBypass =
 		import.meta.env.DEV && import.meta.env.VITE_DEV_OWNER_BYPASS === "true";
@@ -76,6 +81,12 @@ const RequireOwner = ({ children }) => {
 					className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
 				>
 					Try owner demo
+				</button>
+				<button
+					onClick={enterEmployeeDemo}
+					className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+				>
+					Try demo employee
 				</button>
 			</Message>
 		);

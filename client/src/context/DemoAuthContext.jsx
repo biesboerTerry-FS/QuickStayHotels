@@ -24,6 +24,14 @@ const demoUsers = {
 		primaryEmailAddress: { emailAddress: "demo-owner@quickstay.dev" },
 		publicMetadata: { role: "hotelOwner" },
 	},
+	employee: {
+		id: "demo_employee",
+		fullName: "Maya Martinez",
+		username: "demo_employee",
+		employeeId: "demo_employee_1",
+		primaryEmailAddress: { emailAddress: "maya.martinez@quickstay.dev" },
+		publicMetadata: { role: "employee" },
+	},
 };
 
 const loadDemoMode = () => {
@@ -107,6 +115,7 @@ export const DemoAuthProvider = ({ children }) => {
 			isDemoMode: DEMO_ENABLED,
 			isDemoUser: Boolean(active),
 			isDemoOwner: active === "owner",
+			isDemoEmployee: active === "employee",
 			mode: active,
 			demoUser: active ? demoUsers[active] : null,
 			startDemo,

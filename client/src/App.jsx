@@ -25,6 +25,8 @@ import NotFound from "./pages/NotFound";
 import Offers from "./pages/Offers";
 import OfferDetails from "./pages/OfferDetails";
 import RequireOwner from "./components/RequireOwner";
+import RequireEmployee from "./components/RequireEmployee";
+import EmployeePortal from "./pages/employee/EmployeePortal";
 import CookieBanner from "./components/CookieBanner";
 import { infoPages } from "./data/infoPages";
 
@@ -40,7 +42,10 @@ const ScrollToTop = () => {
 };
 
 const App = () => {
-	const isOwnerPath = useLocation().pathname.includes("owner");
+	const pathname = useLocation().pathname;
+	const isOwnerPath = pathname.includes("owner");
+	const isEmployeePath = pathname.startsWith("/employee");
+	const isPortalPath = isOwnerPath || isEmployeePath;
 
 	return (
 		<div>
@@ -51,7 +56,7 @@ const App = () => {
 			>
 				Skip to content
 			</a>
-			{!isOwnerPath && <Navbar />}
+			{!isPortalPath && <Navbar />}
 			<main id="main-content" tabIndex={-1} className="min-h-[70vh] focus:outline-none">
 				<Routes>
 					<Route path="/" element={<Home />} />
@@ -68,6 +73,14 @@ const App = () => {
 					<Route path="/saved" element={<SavedRooms />} />
 					<Route path="/offers" element={<Offers />} />
 					<Route path="/offers/:slug" element={<OfferDetails />} />
+					<Route
+						path="/employee"
+						element={
+							<RequireEmployee>
+								<EmployeePortal />
+							</RequireEmployee>
+						}
+					/>
 					{Object.keys(infoPages).map((slug) => (
 						<Route
 							key={slug}
@@ -94,8 +107,8 @@ const App = () => {
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</main>
-			{!isOwnerPath && <Footer />}
-			{!isOwnerPath && <CookieBanner />}
+			{!isPortalPath && <Footer />}
+			{!isPortalPath && <CookieBanner />}
 			<SpeedInsights />
 			<Analytics />
 		</div>

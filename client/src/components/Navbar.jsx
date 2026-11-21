@@ -64,6 +64,11 @@ const Navbar = () => {
 		setIsMenuOpen(false);
 		navigate("/owner");
 	};
+	const enterEmployeeDemo = () => {
+		startDemo("employee");
+		setIsMenuOpen(false);
+		navigate("/employee");
+	};
 	const location = useLocation();
 
 	useEffect(() => {
@@ -201,6 +206,14 @@ const Navbar = () => {
 								Owner demo
 							</button>
 						)}
+						{isDemoMode && (
+							<button
+								onClick={enterEmployeeDemo}
+								className="hidden lg:inline px-4 py-2.5 rounded-full border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+							>
+								Try demo employee
+							</button>
+						)}
 						<button
 							onClick={() => openSignIn()}
 							className="bg-primary hover:bg-primary-dull text-white px-8 py-2.5 rounded-full transition-all duration-500 cursor-pointer"
@@ -302,6 +315,14 @@ const Navbar = () => {
 								className="px-8 py-2.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
 							>
 								Owner demo
+							</button>
+						)}
+						{isDemoMode && (
+							<button
+								onClick={enterEmployeeDemo}
+								className="px-8 py-2.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+							>
+								Try demo employee
 							</button>
 						)}
 						<button
