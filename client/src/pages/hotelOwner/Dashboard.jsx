@@ -5,6 +5,7 @@ import { useBookings, useRooms } from "../../data/store";
 import { bookingStatus } from "../../lib/bookings";
 import { formatCurrency, formatDay, toDay } from "../../lib/format";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import LatestBulletinWidget from "../../components/hotelOwner/LatestBulletinWidget";
 
 const StatCard = ({ label, value, hint, icon }) => (
 	<div className="bg-white border border-gray-200 rounded-xl p-5 flex items-start gap-4 shadow-sm">
@@ -101,6 +102,10 @@ const Dashboard = () => {
 				title="Dashboard"
 				subTitle="Monitor your listings, track bookings, and analyze revenue - all in one place."
 			/>
+
+			<div className="mt-6">
+				<LatestBulletinWidget />
+			</div>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 my-8">
 				<StatCard
@@ -203,10 +208,10 @@ const Dashboard = () => {
 								</tr>
 							</thead>
 							<tbody className="text-sm">
-								{recent.map((item) => {
+								{recent.map((item, index) => {
 									const status = bookingStatus(item);
 									return (
-										<tr key={item._id}>
+										<tr key={`${item._id}-${index}`}>
 											<td className="py-3 px-4 text-gray-700 border-t border-gray-200">{item.userName}</td>
 											<td className="py-3 px-4 text-gray-700 border-t border-gray-200 max-sm:hidden">{item.room.roomType}</td>
 											<td className="py-3 px-4 text-gray-700 border-t border-gray-200 max-sm:hidden">

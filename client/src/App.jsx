@@ -19,6 +19,7 @@ import ListRooms from "./pages/hotelOwner/ListRooms";
 import Bookings from "./pages/hotelOwner/Bookings";
 import HotelProfile from "./pages/hotelOwner/HotelProfile";
 import OwnerOffers from "./pages/hotelOwner/Offers";
+import Announcements from "./pages/hotelOwner/Announcements";
 import InfoPage from "./pages/InfoPage";
 import NotFound from "./pages/NotFound";
 import Offers from "./pages/Offers";
@@ -87,6 +88,7 @@ const App = () => {
 						<Route path="list-rooms" element={<ListRooms />} />
 						<Route path="bookings" element={<Bookings />} />
 						<Route path="offers" element={<OwnerOffers />} />
+						<Route path="announcements" element={<Announcements />} />
 						<Route path="profile" element={<HotelProfile />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />

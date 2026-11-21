@@ -118,10 +118,10 @@ const Bookings = () => {
 						</tr>
 					</thead>
 					<tbody className="text-gray-700">
-						{visible.map((booking) => {
+						{visible.map((booking, index) => {
 							const status = bookingStatus(booking);
 							return (
-								<tr key={booking._id} className="border-t border-gray-200">
+								<tr key={`${booking._id}-${index}`} className="border-t border-gray-200">
 									<td className="py-3 px-4 font-mono text-xs text-gray-500">
 										{booking._id.slice(-6).toUpperCase()}
 									</td>
