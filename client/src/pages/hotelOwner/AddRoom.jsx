@@ -165,10 +165,10 @@ const AddRoom = () => {
 							onUpload={(url) =>
 								setForm((prev) => ({ ...prev, images: [...prev.images, url] }))
 							}
-							onRemove={(url) =>
+							onRemove={(_, index) =>
 								setForm((prev) => ({
 									...prev,
-									images: prev.images.filter((image) => image !== url),
+									images: prev.images.filter((_, i) => i !== index),
 								}))
 							}
 						/>

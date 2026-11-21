@@ -42,9 +42,9 @@ const ImageUpload = ({
 		onUpload?.(url);
 	};
 
-	const removeUrl = (url) => {
-		if (value == null) setInternalUrls((prev) => prev.filter((item) => item !== url));
-		onRemove?.(url);
+	const removeUrl = (url, index) => {
+		if (value == null) setInternalUrls((prev) => prev.filter((_, i) => i !== index));
+		onRemove?.(url, index);
 	};
 
 	const handleChange = async (event) => {
@@ -84,7 +84,7 @@ const ImageUpload = ({
 					if (!response.ok) throw new Error(data.message || "Upload failed");
 
 					// Single-file fields replace their existing preview.
-					if (single && urls.length) removeUrl(urls[0]);
+					if (single && urls.length) removeUrl(urls[0], 0);
 					addUrl(data.url);
 					succeeded += 1;
 				} catch (error) {
@@ -152,7 +152,7 @@ const ImageUpload = ({
 						type="button"
 						aria-label={`Remove image ${index + 1}`}
 						data-testid="remove-image"
-						onClick={() => removeUrl(url)}
+						onClick={() => removeUrl(url, index)}
 						className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs leading-none hover:bg-red-600"
 					>
 						×
