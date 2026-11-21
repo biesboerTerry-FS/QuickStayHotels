@@ -16,6 +16,16 @@ const Sidebar = () => {
 			],
 		},
 		{
+			name: "HR",
+			links: [
+				{ name: "Directory", path: "/owner/hr", icon: assets.userIcon },
+				{ name: "Payroll", path: "/owner/hr/payroll", icon: assets.badgeIcon },
+				{ name: "Time-off", path: "/owner/hr/time-off", icon: assets.calenderIcon },
+				{ name: "Performance", path: "/owner/hr/performance", icon: assets.announcementIcon },
+				{ name: "Roles & Departments", path: "/owner/hr/settings", icon: assets.listIcon },
+			],
+		},
+		{
 			name: "Communication",
 			links: [
 				{

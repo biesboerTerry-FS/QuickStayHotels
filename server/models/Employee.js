@@ -22,6 +22,12 @@ const EmployeeSchema = new mongoose.Schema(
 		phone: { type: String, default: "" },
 		address: { type: String, default: "" },
 		assignments: { type: [AssignmentSchema], default: [] },
+		// HR-only fields. The employee self-service portal cannot write any of
+		// these; the owner/admin HR routes own them.
+		employmentStatus: { type: String, enum: ["active", "inactive"], default: "active" },
+		payType: { type: String, enum: ["hourly", "salary"], default: "hourly" },
+		payRate: { type: Number, default: 0 },
+		hireDate: { type: String, default: "" },
 	},
 	{ timestamps: true, versionKey: false }
 );

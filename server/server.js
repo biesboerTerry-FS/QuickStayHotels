@@ -15,6 +15,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import seedRoutes from "./routes/seedRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
+import hrRoutes from "./routes/hrRoutes.js";
 import portalRoutes from "./routes/portalRoutes.js";
 import { initSentry } from "./utils/sentry.js";
 import Stripe from "stripe";
@@ -125,6 +126,9 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/seed", seedRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/employee", employeeRoutes);
+// Owner/admin-only HR suite. All routes are JWT protected with owner/admin
+// roles; public room browse and the employee self-service portal are untouched.
+app.use("/api/hr", hrRoutes);
 app.use("/api/portal", portalRoutes);
 
 app.get("/", (request, response) => response.send("API is working, yo"));

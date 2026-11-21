@@ -20,6 +20,11 @@ import Bookings from "./pages/hotelOwner/Bookings";
 import HotelProfile from "./pages/hotelOwner/HotelProfile";
 import OwnerOffers from "./pages/hotelOwner/Offers";
 import Announcements from "./pages/hotelOwner/Announcements";
+import HrDirectory from "./pages/hotelOwner/hr/HrDirectory";
+import Payroll from "./pages/hotelOwner/hr/Payroll";
+import TimeOff from "./pages/hotelOwner/hr/TimeOff";
+import Performance from "./pages/hotelOwner/hr/Performance";
+import HrSettings from "./pages/hotelOwner/hr/HrSettings";
 import InfoPage from "./pages/InfoPage";
 import NotFound from "./pages/NotFound";
 import Offers from "./pages/Offers";
@@ -113,6 +118,12 @@ const App = () => {
 						<Route path="schedule" element={<PortalSchedule role="owner" />} />
 						<Route path="offers" element={<OwnerOffers />} />
 						<Route path="announcements" element={<Announcements />} />
+						{/* Owner-only HR suite — every route sits behind RequireOwner. */}
+						<Route path="hr" element={<HrDirectory />} />
+						<Route path="hr/payroll" element={<Payroll />} />
+						<Route path="hr/time-off" element={<TimeOff />} />
+						<Route path="hr/performance" element={<Performance />} />
+						<Route path="hr/settings" element={<HrSettings />} />
 						<Route path="profile" element={<HotelProfile />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />

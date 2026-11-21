@@ -26,6 +26,10 @@ const nullableStringField = (max = MAX_STRING) => (value) => {
 	return stringField(max)(value);
 };
 
+// Optional HR text fields are often submitted as empty strings by forms.
+const optionalStringField = (max = MAX_STRING) => (value) =>
+	value === "" ? null : stringField(max)(value);
+
 const idField = (value) => {
 	const error = stringField(120)(value);
 	if (error) return error;
@@ -239,6 +243,103 @@ export const validateDemoLogin = (request, response, next) => {
 	}
 	return next();
 };
+
+// ---------------------------------------------------------------------------
+// Owner/admin-only HR suite validation. These schemas are intentionally
+// stricter than the self-service employee route: pay, status and role fields
+// can only be changed through the HR API.
+// ---------------------------------------------------------------------------
+const hrEmployeeSchema = {
+	fullName: required(stringField(120)),
+	position: required(stringField(120)),
+	department: optionalStringField(120),
+	email: required(emailField),
+	phone: optionalStringField(60),
+	address: optionalStringField(300),
+	employmentStatus: enumField(["active", "inactive"]),
+	payType: enumField(["hourly", "salary"]),
+	payRate: numberField(0, 10_000_000),
+	hireDate: (value) => (value === "" ? null : dateField(value)),
+};
+
+const monthField = (value) => {
+	const error = stringField(7)(value);
+	if (error) return error;
+	if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return "must be a valid YYYY-MM period";
+	return null;
+};
+
+const hrListField = (kind) => (value) => {
+	if (!Array.isArray(value) || value.length > 100) return "must be an array of at most 100 items";
+	for (const item of value) {
+		if (!isPlainObject(item)) return "contains an invalid item";
+		const idError = idField(item.id);
+		if (idError) return `item.id ${idError}`;
+		const labelKey = kind === "departments" ? "name" : "label";
+		const labelError = stringField(120)(item[labelKey]);
+		if (labelError) return `item.${labelKey} ${labelError}`;
+		for (const key of Object.keys(item)) {
+			if (!["id", "name", "description", "label", "department"].includes(key)) {
+				return `unknown item field: ${key}`;
+			}
+		}
+		if (item.description !== undefined && typeof item.description !== "string") {
+			return "item.description must be a string of at most 300 characters";
+		}
+		if (typeof item.description === "string" && item.description.length > 300) {
+			return "item.description must be a string of at most 300 characters";
+		}
+	}
+	return null;
+};
+
+const hrSettingsSchema = {
+	departments: required(hrListField("departments")),
+	roles: required(hrListField("roles")),
+};
+
+// `required()` mutates its validator, so wrap shared validators to keep these
+// optional metadata fields truly optional.
+const optionalIdField = (value) => (value === "" ? null : idField(value));
+const optionalShortString = (max) => (value) => (value === "" ? null : stringField(max)(value));
+
+const payRunSchema = {
+	employeeId: required(idField),
+	employeeName: required(stringField(120)),
+	period: required(monthField),
+	hours: required(numberField(0, 1000)),
+	amount: required(numberField(0, 10_000_000)),
+	note: optionalShortString(500),
+};
+
+const employmentStatusSchema = {
+	status: required(enumField(["active", "inactive"])),
+};
+
+const timeOffDecisionSchema = {
+	status: required(enumField(["approved", "denied"])),
+	decidedBy: optionalShortString(120),
+	type: enumField(["time-off", "shift"]),
+	employeeId: optionalIdField,
+	employeeName: optionalShortString(120),
+	date: optionalShortString(20),
+	endDate: optionalShortString(20),
+	reason: optionalShortString(500),
+};
+
+const performanceNoteSchema = {
+	employeeId: required(idField),
+	text: required(stringField(2000)),
+	author: optionalShortString(120),
+};
+
+export const validateHrEmployee = validateFields(hrEmployeeSchema);
+export const validateHrEmployeePatch = validateFields(hrEmployeeSchema, { partial: true });
+export const validateHrEmploymentStatus = validateFields(employmentStatusSchema);
+export const validateHrSettings = validateFields(hrSettingsSchema);
+export const validatePayRun = validateFields(payRunSchema);
+export const validateTimeOffDecision = validateFields(timeOffDecisionSchema);
+export const validatePerformanceNote = validateFields(performanceNoteSchema);
 
 export const rejectMalformedBody = (request, response, next) => {
 	const body = request.body;

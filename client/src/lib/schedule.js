@@ -1,55 +1,16 @@
 import { useSyncExternalStore } from "react";
 import { syncPortalState } from "./portalState";
+import { TIME_OFF_SEED_REQUESTS } from "../data/hrSeed";
 
 // Schedule requests, time-off requests and the availability toggle are
 // persisted locally so both portals work without a database.
 export const SCHEDULE_STORAGE_KEY = "quickstay-schedule";
 export const DEMO_EMPLOYEE_ID = "demo_employee_1";
 
-const dateFromToday = (offset) => {
-	const date = new Date();
-	date.setHours(12, 0, 0, 0);
-	date.setDate(date.getDate() + offset);
-	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-		date.getDate()
-	).padStart(2, "0")}`;
-};
-
 const SEED_STATE = {
-	requests: [
-		{
-			id: "req_shift_1",
-			type: "shift",
-			employeeId: DEMO_EMPLOYEE_ID,
-			employeeName: "Maya Martinez",
-			date: dateFromToday(4),
-			reason: "Prefer the evening shift to cover the VIP arrival.",
-			status: "pending",
-			createdAt: "2026-11-19T09:00:00.000Z",
-		},
-		{
-			id: "req_timeoff_1",
-			type: "time-off",
-			employeeId: DEMO_EMPLOYEE_ID,
-			employeeName: "Maya Martinez",
-			date: dateFromToday(10),
-			endDate: dateFromToday(11),
-			reason: "Personal appointment.",
-			status: "pending",
-			createdAt: "2026-11-18T14:20:00.000Z",
-		},
-		{
-			id: "req_timeoff_2",
-			type: "time-off",
-			employeeId: "demo_employee_2",
-			employeeName: "Daniel Kim",
-			date: dateFromToday(6),
-			endDate: dateFromToday(6),
-			reason: "Annual leave.",
-			status: "approved",
-			createdAt: "2026-11-17T10:00:00.000Z",
-		},
-	],
+	// Shared with the owner HR time-off queue so both portals see the same
+	// requests and approvals.
+	requests: TIME_OFF_SEED_REQUESTS,
 	availability: { [DEMO_EMPLOYEE_ID]: true, demo_employee_2: true },
 };
 
@@ -79,7 +40,14 @@ const load = () => {
 	if (cache) return cache;
 	const stored = readStorage();
 	if (stored && Array.isArray(stored.requests) && stored.availability) {
-		cache = stored;
+		// Add any new demo requests without losing approvals/decisions already
+		// stored in this browser.
+		const known = new Set(stored.requests.map((item) => item.id));
+		const missing = SEED_STATE.requests.filter((item) => !known.has(item.id));
+		cache = {
+			...stored,
+			requests: [...stored.requests, ...missing.map((item) => ({ ...item }))],
+		};
 	} else {
 		cache = {
 			requests: SEED_STATE.requests.map((item) => ({ ...item })),
